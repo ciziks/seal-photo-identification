@@ -9,6 +9,7 @@ packages = [{include = "sealcentre_photo_identification"}]
 [tool.poetry.dependencies]
 python = "3.10.12"
 requests = "^2.31.0"
+docker = "^7.0.0"
 
 
 [build-system]
