@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for
-import requests
-import Wildbook
+from Wildbook import Wildbook  
 
 app = Flask(__name__)
 
+# Create an instance of the Wildbook class
+wildbook_instance = Wildbook()
 
 @app.route('/')
 def home():
@@ -17,9 +18,15 @@ def upload():
     if image.filename == '':
         return redirect(request.url)
     
-    image_id_or_message = Wildbook.upload_image(image)
-    # Handle the response appropriately
-    return image_id_or_message
+    # Save the file temporarily
+    temp_image_path = 'path_to_temp_storage'  # Specify the path to save the temporary file
+    image.save(temp_image_path)
+    
+    # Call the upload_image method on the instance of Wildbook
+    image_id = wildbook_instance.upload_image(temp_image_path)
+    
+    # Handle the response
+    return str(image_id)
 
 if __name__ == "__main__":
     app.run(debug=True)
