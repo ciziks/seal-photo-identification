@@ -61,19 +61,28 @@ class Wildbook:
         return [uuid["__UUID__"] for uuid in response_json["response"]]
 
     # Method to get Image's height through its ID
-    def get_image_height(self, image_id_list: List[str]):
-        endpoint = f"{self.base_url}/api/image/height/"
+    def get_image_size(self, image_id_list: List[str]):
+        endpoint_height = f"{self.base_url}/api/image/height/"
+        endpoint_width = f"{self.base_url}/api/image/width/"
         payload = {"gid_list": image_id_list}
 
-        response = requests.get(endpoint, params=payload)
-        response_json = response.json()
+        response_height = requests.get(endpoint_height, params=payload)
+        response_height_json = response_height.json()
 
-        status = response_json.get("status")
-        if not status.get("success", None):
-            return Exception(status.get("message"))
+        response_width = requests.get(endpoint_width, params=payload)
+        response_width_json = response_width.json()
 
-        return response_json["response"]
-    
+        status_height = not response_width_json.get("status")
+        status_width = not response_width_json.get("status")
+
+        if not status_height.get("success", None):
+            return Exception(status_height.get("message"))
+
+        if not status_width.get("success", None):
+            return Exception(status_width.get("message"))
+
+        return zip(status_width, status_height)
+
     # Method to get Image's width through its ID
     def get_image_height(self, image_id_list: List[str]):
         endpoint = f"{self.base_url}/api/image/width/"
@@ -88,6 +97,7 @@ class Wildbook:
 
         return response_json["response"]
 
+    # Method
     # Method to manually create WildBook annotations from a list of uploaded images
     def create_annotation(
         self, image_uuid_list: List[str], box_list: List[Tuple[int]]
