@@ -68,8 +68,24 @@ class Wildbook:
         response_json = response.json()
 
         status = response_json.get("status")
-        gid_list = []
-        if status.get("success", None):
-            gid_list = [gid[0] for gid in response_json["response"]]
+        if not status.get("success", None):
+            return Exception(status.get("message"))
 
+        gid_list = [gid[0] for gid in response_json["response"]]
         return gid_list
+
+    # Method to rename the animals in Annotations
+    def rename_annotations(
+        self, annot_id_list: List[str], name_list: List[str]
+    ) -> None:
+        endpoint = f"{self.base_url}/api/annot/name/"
+        payload = {"aid_list": annot_id_list, "name_list": name_list}
+
+        response = requests.post(endpoint, json=payload)
+        response_json = response.json()
+
+        status = response_json.get("status")
+        if not status.get("success", None):
+            return Exception(status.get("message"))
+
+        return
