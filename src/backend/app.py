@@ -27,13 +27,13 @@ def upload(wildbook: Wildbook = world[Wildbook]):
     image.save(temp_image_path)
 
     image_id = wildbook.upload_image(temp_image_path)
+    
+    aid_list = wildbook.detect_seal([int(image_id)])
 
-    gid_list = wildbook.detect_seal([image_id])
-
-    wildbook.rename_annotations([gid_list], [image_name])  # Rename the uploaded image with the provided name
+    wildbook.rename_annotations(aid_list, [image_name])  # Rename the uploaded image with the provided name
     
     # Handle the response
-    return str(image_id)
+    return str(aid_list)
 
 if __name__ == "__main__":
     app.run(debug=True)

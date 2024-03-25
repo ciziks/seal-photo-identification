@@ -28,10 +28,10 @@ class Wildbook:
         status = response_json.get("status")
 
         if not status.get("success", None):
-            return Exception(status.get("message"))
+            return status.get("message")
 
         image_id = response_json.get("response")
-        return image_id
+        return str(image_id)
 
     # Method to get Image's ID
     def list_images_id(self):
@@ -154,13 +154,13 @@ class Wildbook:
         return annotations_id
 
     # Method to create an annotation automatically by CNN Detection
-    def detect_seal(self, image_id_list: List[str], cnn_algorithm="yolo") -> List[str]:
+    def detect_seal(self, image_id_list: List[int], cnn_algorithm="yolo") -> List[str]:
         # Check if selected CNN Algorithm is valid
         valid_cnn = {"yolo", "lightnet"}
         if cnn_algorithm not in valid_cnn:
-            return ValueError(f"CNN Algorithms need to be {valid_cnn}")
+            raise ValueError(f"CNN Algorithms need to be {valid_cnn}")
 
-        endpoint = f"{self.base_url}/api/detect/{cnn_algorithm}/"
+        endpoint = f"{self.base_url}/api/detect/cnn/yolo/"
         payload = {"gid_list": image_id_list}
 
         response = requests.put(endpoint, json=payload)
@@ -168,10 +168,9 @@ class Wildbook:
 
         status = response_json.get("status")
         if not status.get("success", None):
-            return Exception(status.get("message"))
+            raise Exception(status.get("message"))
 
-        gid_list = [gid[0] for gid in response_json.get("response", None)]
-        return gid_list
+        return response_json.get("response")[0]
 
     # Method to rename the animals in Annotations
     def rename_annotations(
@@ -180,7 +179,7 @@ class Wildbook:
         endpoint = f"{self.base_url}/api/annot/name/"
         payload = {"aid_list": annot_id_list, "name_list": name_list}
 
-        response = requests.post(endpoint, json=payload)
+        response = requests.put(endpoint, json=payload)
         response_json = response.json()
 
         status = response_json.get("status")
