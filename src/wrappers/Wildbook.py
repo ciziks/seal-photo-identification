@@ -33,6 +33,33 @@ class Wildbook:
         image_id = response_json.get("response")
         return image_id
 
+    # Method to get Image's UUID through its ID
+    def list_image_ids(self):
+        endpoint = f"{self.base_url}/api/image/"
+
+        response = requests.get(endpoint)
+        response_json = response.json()
+
+        status = response_json.get("status")
+        if not status.get("success", None):
+            return Exception(status.get("message"))
+
+        return response_json["response"]
+
+    # Method to get Image's UUID through its ID
+    def get_image_uuids(self, image_id_list: List[str]) -> List[str]:
+        endpoint = f"{self.base_url}/api/image/uuid/"
+        payload = {"gid_list": image_id_list}
+
+        response = requests.get(endpoint, json=payload)
+        response_json = response.json()
+
+        status = response_json.get("status")
+        if not status.get("success", None):
+            return Exception(status.get("message"))
+
+        return [uuid["__UUID__"] for uuid in response_json["response"]]
+
     # Method to manually create WildBook annotations from a list of uploaded images
     def create_annotation(
         self, image_uuid_list: List[str], box_list: List[Tuple[int]]
