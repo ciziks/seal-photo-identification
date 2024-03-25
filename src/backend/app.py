@@ -23,16 +23,17 @@ def upload(wildbook: Wildbook = world[Wildbook]):
         return redirect(request.url)
 
     # Save the file temporarily
-    temp_image_path = "path_to_temp_storage"  # Specify the path to save the temporary file
+    temp_image_path = "path_to_temp_storage" 
     image.save(temp_image_path)
 
-    # Call the upload_image method on the instance of Wildbook
     image_id = wildbook.upload_image(temp_image_path)
 
-    wildbook.rename_annotations([image_id], [image_name])  
+    gid_list = wildbook.detect_seal([image_id])
+
+    wildbook.rename_annotations([gid_list], [image_name])  # Rename the uploaded image with the provided name
     
     # Handle the response
-    return str("Image with id " + image_id + " uploaded succesfully with name " + image_name)
+    return str(image_id)
 
 if __name__ == "__main__":
     app.run(debug=True)
