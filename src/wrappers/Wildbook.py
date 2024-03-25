@@ -160,7 +160,7 @@ class Wildbook:
         endpoint = f"{self.base_url}/api/detect/{cnn_algorithm}/"
         payload = {"gid_list": image_id_list}
 
-        response = requests.post(endpoint, json=payload)
+        response = requests.put(endpoint, json=payload)
         response_json = response.json()
 
         status = response_json.get("status")
@@ -178,6 +178,20 @@ class Wildbook:
         payload = {"aid_list": annot_id_list, "name_list": name_list}
 
         response = requests.post(endpoint, json=payload)
+        response_json = response.json()
+
+        status = response_json.get("status")
+        if not status.get("success", None):
+            return Exception(status.get("message"))
+
+        return
+
+    # Method to mark annotation as Exemplar
+    def mark_as_exemplar(self, annot_id_list: List[str]) -> None:
+        endpoint = f"{self.base_url}/api/annot/exemplar/"
+        payload = {"aid_list": annot_id_list, "flag_list": [1] * len(annot_id_list)}
+
+        response = requests.put(endpoint, json=payload)
         response_json = response.json()
 
         status = response_json.get("status")
