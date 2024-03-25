@@ -122,7 +122,7 @@ class Wildbook:
 
     # Method to get Annotation ID through its UUID
     def get_annotation_id(self, uuid_list: List[str]):
-        endpoint = f"{self.base_url}/api/annot/rowid/"
+        endpoint = f"{self.base_url}/api/annot/rowid/uuid"
         payload = {"uuid_list": uuid_list}
 
         response = requests.get(endpoint, json=payload)
