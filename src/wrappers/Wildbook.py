@@ -33,7 +33,7 @@ class Wildbook:
         image_id = response_json.get("response")
         return image_id
 
-    # Method to get Image's UUID through its ID
+    # Method to get Image's ID
     def list_images_id(self):
         endpoint = f"{self.base_url}/api/image/"
 
@@ -134,8 +134,8 @@ class Wildbook:
 
         return response_json.get("response", None)
 
-    # Method to get Annotation ID through its UUID
-    def list_annotations_uuid(self):
+    # Method to list Annotation ID
+    def list_annotations_id(self):
         endpoint = f"{self.base_url}/api/annot/json/"
 
         response = requests.get(endpoint)
@@ -148,7 +148,10 @@ class Wildbook:
         annotations_uuid = [
             uuid["__UUID__"] for uuid in response_json.get("response", None)
         ]
-        return annotations_uuid
+
+        annotations_id = self.get_annotation_id(annotations_uuid)
+
+        return annotations_id
 
     # Method to create an annotation automatically by CNN Detection
     def detect_seal(self, image_id_list: List[str], cnn_algorithm="yolo") -> List[str]:
@@ -213,3 +216,25 @@ class Wildbook:
             return Exception(status.get("message"))
 
         return
+
+    # Method to perform seal matching with all annotations
+    def seal_matching(self, annotation_id: str) -> dict:
+        endpoint = f"{self.base_url}/api/query/chip/dict/simple"
+
+        all_annotations_id = self.list_annotations_id()
+        all_annotations_id.remove(annotation_id)
+        payload = {"qaid_list": all_annotations_id, "daid_list": [annotation_id]}
+
+        response = requests.get(endpoint, json=payload)
+        response_json = response.json()
+
+        status = response_json.get("status")
+        if not status.get("success", None):
+            return Exception(status.get("message"))
+
+        comparison_scores = {}
+        for comparison in response_json["response"]:
+            score = comparison["score_list"] if comparison["score_list"] else 1
+            comparison_scores[comparison["qaid"]] = score
+
+        return comparison_scores
