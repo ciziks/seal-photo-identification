@@ -2,6 +2,7 @@ from typing import List, Tuple
 from antidote import injectable
 import requests
 
+
 @injectable
 class Wildbook:
     def __init__(self) -> None:
@@ -35,7 +36,7 @@ class Wildbook:
     # Method to manually create WildBook annotations from a list of uploaded images
     def create_annotation(
         self, image_uuid_list: List[str], box_list: List[Tuple[int]]
-    ) -> str:
+    ) -> List[str]:
         endpoint = f"{self.base_url}/api/annot/json/"
         annotation = {
             "image_uuid_list": image_uuid_list,
@@ -44,9 +45,28 @@ class Wildbook:
         }
 
         response = requests.post(endpoint, json=annotation)
+        response_json = response.json()
 
-        wildbook_response = response.json()["response"][0]
-        annot_uuid = wildbook_response["__UUID__"]
-        return annot_uuid
+        status = response_json.get("status")
+        annotation_uuids = []
+        if status.get("success", None):
+            uuids = response_json["response"]
+            annotation_uuids = [uuid["__UUID__"] for uuid in uuids]
 
-wildbook = Wildbook()
+        return annotation_uuids
+
+    # Method to create an annotation automatically by CNN Detection
+    def detect_seal(self, image_id_list: List[str], cnn_algorithm="yolo") -> List[str]:
+        endpoint = f"{self.base_url}/api/detect/{cnn_algorithm}/"
+        payload = {"gid_list": image_id_list}
+
+        response = requests.post(endpoint, json=payload)
+        response_json = response.json()
+
+        status = response_json.get("status")
+        gid_list = []
+        if status.get("success", None):
+            gids = response_json["response"]
+            gid_list = [gid[0] for gid in gids]
+
+        return gid_list
