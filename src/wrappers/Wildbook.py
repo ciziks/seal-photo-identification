@@ -34,7 +34,7 @@ class Wildbook:
         return image_id
 
     # Method to get Image's UUID through its ID
-    def list_image_ids(self):
+    def list_images_id(self):
         endpoint = f"{self.base_url}/api/image/"
 
         response = requests.get(endpoint)
@@ -47,7 +47,7 @@ class Wildbook:
         return response_json["response"]
 
     # Method to get Image's UUID through its ID
-    def get_image_uuids(self, image_id_list: List[str]) -> List[str]:
+    def get_images_uuids(self, image_id_list: List[str]) -> List[str]:
         endpoint = f"{self.base_url}/api/image/uuid/"
         payload = {"gid_list": image_id_list}
 
@@ -61,7 +61,7 @@ class Wildbook:
         return [uuid["__UUID__"] for uuid in response_json["response"]]
 
     # Method to get Image's height through its ID
-    def get_image_size(self, image_id_list: List[str]):
+    def get_images_size(self, image_id_list: List[str]):
         endpoint_height = f"{self.base_url}/api/image/height/"
         endpoint_width = f"{self.base_url}/api/image/width/"
         payload = {"gid_list": image_id_list}
@@ -72,7 +72,7 @@ class Wildbook:
         response_width = requests.get(endpoint_width, params=payload)
         response_width_json = response_width.json()
 
-        status_height = not response_width_json.get("status")
+        status_height = not response_height_json.get("status")
         status_width = not response_width_json.get("status")
 
         if not status_height.get("success", None):
@@ -83,21 +83,20 @@ class Wildbook:
 
         return zip(status_width, status_height)
 
-    # Method to get Image's width through its ID
-    def get_image_height(self, image_id_list: List[str]):
-        endpoint = f"{self.base_url}/api/image/width/"
-        payload = {"gid_list": image_id_list}
+    # Method to remove image from database
+    def remove_image(self, image_uuid_list: List[str]) -> None:
+        endpoint = f"{self.base_url}/api/image/json/"
+        payload = {"image_uuid_list": image_uuid_list}
 
-        response = requests.get(endpoint, params=payload)
+        response = requests.delete(endpoint, json=payload)
         response_json = response.json()
 
         status = response_json.get("status")
         if not status.get("success", None):
             return Exception(status.get("message"))
 
-        return response_json["response"]
+        return
 
-    # Method
     # Method to manually create WildBook annotations from a list of uploaded images
     def create_annotation(
         self, image_uuid_list: List[str], box_list: List[Tuple[int]]
