@@ -125,7 +125,7 @@ class Wildbook:
         endpoint = f"{self.base_url}/api/annot/rowid/"
         payload = {"uuid_list": uuid_list}
 
-        response = requests.post(endpoint, json=payload)
+        response = requests.get(endpoint, json=payload)
         response_json = response.json()
 
         status = response_json.get("status")
@@ -133,6 +133,22 @@ class Wildbook:
             return Exception(status.get("message"))
 
         return response_json.get("response", None)
+
+    # Method to get Annotation ID through its UUID
+    def list_annotations_uuid(self):
+        endpoint = f"{self.base_url}/api/annot/json/"
+
+        response = requests.get(endpoint)
+        response_json = response.json()
+
+        status = response_json.get("status")
+        if not status.get("success", None):
+            return Exception(status.get("message"))
+
+        annotations_uuid = [
+            uuid["__UUID__"] for uuid in response_json.get("response", None)
+        ]
+        return annotations_uuid
 
     # Method to create an annotation automatically by CNN Detection
     def detect_seal(self, image_id_list: List[str], cnn_algorithm="yolo") -> List[str]:
