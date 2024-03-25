@@ -27,11 +27,11 @@ class Wildbook:
         response_json = response.json()
         status = response_json.get("status")
 
-        if status.get("success", None):
-            image_id = response_json.get("response")
-            return image_id
-        else:
-            return status.get("message")
+        if not status.get("success", None):
+            return Exception(status.get("message"))
+
+        image_id = response_json.get("response")
+        return image_id
 
     # Method to manually create WildBook annotations from a list of uploaded images
     def create_annotation(
@@ -48,15 +48,19 @@ class Wildbook:
         response_json = response.json()
 
         status = response_json.get("status")
-        annotation_uuids = []
-        if status.get("success", None):
-            uuids = response_json["response"]
-            annotation_uuids = [uuid["__UUID__"] for uuid in uuids]
+        if not status.get("success", None):
+            return Exception(status.get("message"))
 
+        annotation_uuids = [uuid["__UUID__"] for uuid in response_json["response"]]
         return annotation_uuids
 
     # Method to create an annotation automatically by CNN Detection
     def detect_seal(self, image_id_list: List[str], cnn_algorithm="yolo") -> List[str]:
+        # Check if selected CNN Algorithm is valid
+        valid_cnn = {"yolo", "lightnet"}
+        if cnn_algorithm not in valid_cnn:
+            return ValueError(f"CNN Algorithms need to be {valid_cnn}")
+
         endpoint = f"{self.base_url}/api/detect/{cnn_algorithm}/"
         payload = {"gid_list": image_id_list}
 
@@ -66,7 +70,6 @@ class Wildbook:
         status = response_json.get("status")
         gid_list = []
         if status.get("success", None):
-            gids = response_json["response"]
-            gid_list = [gid[0] for gid in gids]
+            gid_list = [gid[0] for gid in response_json["response"]]
 
         return gid_list
