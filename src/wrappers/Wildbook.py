@@ -199,3 +199,17 @@ class Wildbook:
             return Exception(status.get("message"))
 
         return
+
+    # Method to remove Annotation from database
+    def remove_annotation(self, annot_uuid_list: List[str]) -> None:
+        endpoint = f"{self.base_url}/api/image/json/"
+        payload = {"annot_uuid_list": annot_uuid_list}
+
+        response = requests.delete(endpoint, json=payload)
+        response_json = response.json()
+
+        status = response_json.get("status")
+        if not status.get("success", None):
+            return Exception(status.get("message"))
+
+        return
