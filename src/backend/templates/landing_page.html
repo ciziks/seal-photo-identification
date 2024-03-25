@@ -5,6 +5,7 @@
 </head>
 <body style="display: flex; justify-content: center; align-items: center; height: 100vh;">
     <form action="/upload_image" method="post" enctype="multipart/form-data">
+        <input type="text" name="image_name" placeholder="Enter image name" required>
         <input type="file" name="image" required>
         <button type="submit">Upload Image</button>
     </form>

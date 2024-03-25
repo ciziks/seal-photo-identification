@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from antidote import world, inject
-from ..wrappers.Wildbook import Wildbook
+from wrappers.Wildbook import Wildbook
 
 app = Flask(__name__)
 
