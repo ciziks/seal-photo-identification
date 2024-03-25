@@ -32,8 +32,10 @@ def upload(wildbook: Wildbook = world[Wildbook]):
 
     wildbook.rename_annotations(aid_list, [image_name])  # Rename the uploaded image with the provided name
     
+    score = wildbook.seal_matching(aid_list[0])
+
     # Handle the response
-    return str(aid_list)
+    return str(score)
 
 if __name__ == "__main__":
     app.run(debug=True)
