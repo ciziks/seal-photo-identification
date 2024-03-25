@@ -44,7 +44,7 @@ class Wildbook:
         if not status.get("success", None):
             return Exception(status.get("message"))
 
-        return response_json["response"]
+        return response_json.get("response", None)
 
     # Method to get Image's UUID through its ID
     def get_images_uuids(self, image_id_list: List[str]) -> List[str]:
@@ -58,7 +58,7 @@ class Wildbook:
         if not status.get("success", None):
             return Exception(status.get("message"))
 
-        return [uuid["__UUID__"] for uuid in response_json["response"]]
+        return [uuid["__UUID__"] for uuid in response_json.get("response", None)]
 
     # Method to get Image's height through its ID
     def get_images_size(self, image_id_list: List[str]):
@@ -115,8 +115,24 @@ class Wildbook:
         if not status.get("success", None):
             return Exception(status.get("message"))
 
-        annotation_uuids = [uuid["__UUID__"] for uuid in response_json["response"]]
+        annotation_uuids = [
+            uuid["__UUID__"] for uuid in response_json.get("response", None)
+        ]
         return annotation_uuids
+
+    # Method to get Annotation ID through its UUID
+    def get_annotation_id(self, uuid_list: List[str]):
+        endpoint = f"{self.base_url}/api/annot/rowid/"
+        payload = {"uuid_list": uuid_list}
+
+        response = requests.post(endpoint, json=payload)
+        response_json = response.json()
+
+        status = response_json.get("status")
+        if not status.get("success", None):
+            return Exception(status.get("message"))
+
+        return response_json.get("response", None)
 
     # Method to create an annotation automatically by CNN Detection
     def detect_seal(self, image_id_list: List[str], cnn_algorithm="yolo") -> List[str]:
@@ -135,7 +151,7 @@ class Wildbook:
         if not status.get("success", None):
             return Exception(status.get("message"))
 
-        gid_list = [gid[0] for gid in response_json["response"]]
+        gid_list = [gid[0] for gid in response_json.get("response", None)]
         return gid_list
 
     # Method to rename the animals in Annotations
