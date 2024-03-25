@@ -1,16 +1,15 @@
 from typing import List, Tuple
+from antidote import injectable
 import requests
 
-base_url = "http://localhost:84"
-
-
+@injectable
 class Wildbook:
     def __init__(self) -> None:
-        pass
+        self.base_url = "http://localhost:84"
 
     # Method to check if WildBook API is properly running
     def is_running(self) -> bool:
-        endpoint = f"{base_url}/api/test/helloworld/"
+        endpoint = f"{self.base_url}/api/test/helloworld/"
         response = requests.get(endpoint).json()
         response_obj = response.json()
 
@@ -21,7 +20,7 @@ class Wildbook:
 
     # Method to upload an image in WildBook's Database
     def upload_image(self, image_path: str) -> str:
-        endpoint = f"{base_url}/api/upload/image/"
+        endpoint = f"{self.base_url}/api/upload/image/"
         files = {"image": open(image_path, "rb")}
         response = requests.post(endpoint, files=files)
         response_json = response.json()
@@ -37,7 +36,7 @@ class Wildbook:
     def create_annotation(
         self, image_uuid_list: List[str], box_list: List[Tuple[int]]
     ) -> str:
-        endpoint = f"{base_url}/api/annot/json/"
+        endpoint = f"{self.base_url}/api/annot/json/"
         annotation = {
             "image_uuid_list": image_uuid_list,
             "annot_bbox_list": box_list,
@@ -49,3 +48,5 @@ class Wildbook:
         wildbook_response = response.json()["response"][0]
         annot_uuid = wildbook_response["__UUID__"]
         return annot_uuid
+
+wildbook = Wildbook()
