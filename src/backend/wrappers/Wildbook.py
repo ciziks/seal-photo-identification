@@ -236,4 +236,7 @@ class Wildbook:
             score = comparison["score_list"] if comparison["score_list"] else 1
             comparison_scores[comparison["qaid"]] = score
 
-        return comparison_scores
+        # Sorting scores
+        sorted_scores = dict(sorted(comparison_scores.items(), key=lambda item: item[1], reverse=True))
+
+        return sorted_scores
