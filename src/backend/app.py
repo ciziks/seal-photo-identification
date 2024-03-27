@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for
 from antidote import world, inject
 from wrappers.Wildbook import Wildbook
+import os
 
-app = Flask(__name__)
+app = Flask(__name__,template_folder=os.path.join(os.pardir, 'frontend', 'templates'))
 
 
 @app.route("/")
