@@ -2,23 +2,23 @@
 <html>
   <head>
     <title>Confirmation</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/confirmation.css') }}"
-    />
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-teal.css">
   </head>
+  <div class="w3-bar w3-theme">
+    <a href="/" class="w3-bar-item w3-button w3-padding-16">Home</a>
+  </div>
+  <header class="w3-container w3-theme w3-padding" id="myHeader">
+    <div class="w3-center">
+    <h1 class="w3-center">Seal Center Pieterburen</h1>
+      <div class="w3-padding-32">
+  <h2 class="w3-center">Detect seal</h2>
+  </header>
   <body>
-    <div style="display: flex; justify-content: space-between; height: 100vh">
-      <div class="image-container">
-        <img
-          src="data:image/jpeg;base64,{{ initial_image }}"
-          alt="Initial Image"
-        />
-      </div>
-
-      <div class="container">
-        <a href="/"><button class="Button">Go Back</button></a>
-        {% if match_aid %}
+    <div class="w3-container w3-center">
+      <hr>
+      <h3>A match is found!</h3>
+      {% if match_aid %}
         <p>
           Matched with seal with Annotation id: {{ match_aid }}, with score {{
           match_score }}
@@ -29,16 +29,26 @@
           :>
         </p>
         {% endif %}
+    </div>
+    
+    <div class="w3-row-padding"> 
+    
+    <div class="w3-half">
+    <div class="w3-card">
+      <img src="data:image/jpeg;base64,{{ initial_image }}" alt="initial" style="width:100%">
+      <div class="w3-container">
+      <p>ID: {{ match_aid }}</p>
       </div>
-
-      <div class="image-container">
-        {% if match_aid %}
-        <img
-          src="data:image/jpeg;base64,{{ matched_image }}"
-          alt="Matched Image"
-        />
-        {% endif %}
+    </div>
+    </div>
+    
+    <div class="w3-half">
+    <div class="w3-card">
+      <img src="data:image/jpeg;base64,{{ matched_image }}" alt="match" style="width:100%">
+      <div class="w3-container">
+      <p>ID: {{ match_aid }}</p>
       </div>
+    </div>
     </div>
   </body>
 </html>

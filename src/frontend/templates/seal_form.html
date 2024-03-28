@@ -2,29 +2,32 @@
 <html>
   <head>
     <title>Upload Image</title>
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="{{ url_for('static', filename='css/seal_form.css') }}"
-    />
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-teal.css">
   </head>
-  <body
-    style="
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    "
-  >
-    <form action="/seal" method="post" enctype="multipart/form-data">
-      <input
-        type="text"
-        name="image_name"
-        placeholder="Enter image name"
-        required
-      />
-      <input type="file" name="image" required />
-      <button type="submit">Detect seal</button>
-    </form>
+  <body>
+    <div class="w3-bar w3-theme">
+      <a href="/" class="w3-bar-item w3-button w3-padding-16">Home</a>
+    </div>
+    <header class="w3-container w3-theme w3-padding" id="myHeader">
+      <div class="w3-center">
+      <h1 class="w3-center">Seal Center Pieterburen</h1>
+        <div class="w3-padding-32">
+    <h2 class="w3-center">Add Sighting</h2>
+  </header>
+
+</div>
+<div class="w3-center">
+<div class="w3-row-padding">
+<form class="w3-container w3-card-4" action="/seal" method="post" enctype="multipart/form-data">
+  <div class="w3-section">      
+    <input class="w3-input" type="text" name="image_name" placeholder="Enter image name" required>
+    <input class="w3-block" type="file" name="image" required />
+    <button type="submit">Detect seal</button>
+  </div>
+</form>
+</div>
+</div>
+<hr>
   </body>
 </html>

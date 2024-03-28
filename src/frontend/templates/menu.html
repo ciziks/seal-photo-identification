@@ -4,23 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Seal Center</title>
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="{{ url_for('static', filename='css/menu.css') }}"
-    />
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-teal.css">
   </head>
-  <body
-    style="
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    "
-  >
-    <div class="Menu">
-      <a href="seal_form"><button class="Button">Add Sighting</button></a>
-      <button class="Button">List Seal</button>
+  <body>
+  <header class="w3-container w3-theme w3-padding" id="myHeader">
+    <div class="w3-center">
+    <h1 class="w3-center">Seal Center Pieterburen</h1>
     </div>
+  </header>
+  <div class="w3-center">
+  <div class="w3-padding-32">
+    <a href="seal_form">
+      <button class="w3-bar-item w3-button w3-padding-16" onclick="document.getElementById('id01').style.display='block'" style="font-weight:900;">Add Sighting</button></a>
+  </div>
+  <div class="w3-padding-32">
+    <button class="w3-bar-item w3-button w3-padding-16" onclick="document.getElementById('id01').style.display='block'" style="font-weight:900;">List Seals</button>
+  </div>
+  </div>
   </body>
 </html>
