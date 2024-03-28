@@ -1,0 +1,117 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.drop-zone {
+  position: relative;
+  border: 2px dashed lightskyblue;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  margin: 50px auto;
+  width: 75%;
+  height: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.drop-message {
+  font-size: 18px;
+  color: lightskyblue;
+
+}
+
+.ButtonInput {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: lightskyblue;
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 16px;
+}
+
+.ButtonInput:hover {
+    background-color: deepskyblue;
+}
+
+.input-bar{
+     width: 300px;
+     height: 20px;
+     border: 2px solid lightskyblue;
+     border-radius: 5px;
+     padding: 10px;
+     font-size: 16px;
+     outline: none;
+     top: 50%;
+     left: 50%;
+     transform: translate(60%, 100%);
+}
+
+.input-bar:hover {
+    border-color: deepskyblue;
+}
+
+.input-bar:focus {
+    background-color: deepskyblue;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+#imagePreview {
+  margin-top: 20px;
+}
+
+.image-container {
+  margin-bottom: 10px;
+}
+
+.image-container img {
+  max-width: 100%;
+  height: auto;
+}
+
+#imageContainer {
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+.dropped-image {
+    max-height: 150px;
+    width: auto;
+    margin-right: 20px;
+    border: 2px solid #ccc;
+    padding: 5px;
+}
+
+.detect-seal-btn {
+  background-color: lightskyblue;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  position: fixed;
+  bottom: 90px;
+  right: 180px;
+}
+
+.detect-seal-btn:hover {
+  background-color: deepskyblue;
+}
+
+.new-image {
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  max-width: 100%;
+  height: auto;
+}

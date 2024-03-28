@@ -1,13 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="it" xmlns:class="http://www.w3.org/1999/xhtml">
 <head>
-    <title>Upload Image</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seal Center</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/landing_page.css') }}">
+
 </head>
 <body style="display: flex; justify-content: center; align-items: center; height: 100vh;">
-    <form action="/upload_image" method="post" enctype="multipart/form-data">
-        <input type="text" name="image_name" placeholder="Enter image name" required>
-        <input type="file" name="image" required>
-        <button type="submit">Detect seal</button>
-    </form>
+
+<div class="Menu">
+    <a href="upload_form"><button class="Button">Add Sighting</button></a>
+    <button class="Button">List Seal</button>
+</div>
+
 </body>
 </html>

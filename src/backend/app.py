@@ -3,14 +3,21 @@ from antidote import world, inject
 from wrappers.Wildbook import Wildbook
 import os
 
-app = Flask(__name__,template_folder=os.path.join(os.pardir, 'frontend', 'templates'))
+app = Flask(__name__,
+            template_folder=os.path.join(os.pardir, 'frontend', 'templates'),
+            static_folder=os.path.join(os.pardir, 'frontend', 'static'))
 
 
 @app.route("/")
 def home():
     return render_template("landing_page.html")
 
+#Handle Get request to open new Html page
+@app.route("/upload_form")
+def upload_form():
+    return render_template("AddSighting.html")
 
+#Handle the Image Upload
 @inject
 @app.route("/upload_image", methods=["POST"])
 def upload(wildbook: Wildbook = world[Wildbook]):
