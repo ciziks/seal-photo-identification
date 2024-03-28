@@ -153,6 +153,21 @@ class Wildbook:
 
         return annotations_id
 
+    # Method to return Annotation's Image URL
+    def get_annotation_image(self, annot_id: str):
+        endpoint = f"{self.base_url}/api/annot/{annot_id}/"
+
+        response = requests.get(endpoint)
+        response_json = response.json()
+
+        status = response_json.get("status")
+        if not status.get("success", None):
+            return Exception(status.get("message"))
+
+        image_url = response_json["response"]
+
+        return image_url
+
     # Method to create an annotation automatically by CNN Detection
     def detect_seal(self, image_id_list: List[int], cnn_algorithm="yolo") -> List[str]:
         # Check if selected CNN Algorithm is valid
@@ -237,6 +252,8 @@ class Wildbook:
             comparison_scores[comparison["qaid"]] = score
 
         # Sorting scores
-        sorted_scores = dict(sorted(comparison_scores.items(), key=lambda item: item[1], reverse=True))
+        sorted_scores = dict(
+            sorted(comparison_scores.items(), key=lambda item: item[1], reverse=True)
+        )
 
         return sorted_scores
