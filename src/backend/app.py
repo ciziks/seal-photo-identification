@@ -31,10 +31,10 @@ def seal_form():
     return render_template("seal_form.html")
 
 
-# Handle the Image Upload
+# Handle the request to store a image and compare with database
 @inject
 @app.route("/seal", methods=["POST"])
-def upload(wildbook: Wildbook = world[Wildbook]):
+def new_seal(wildbook: Wildbook = world[Wildbook]):
     if (
         "image" not in request.files or "image_name" not in request.form
     ):  # Check for image and image_name
@@ -94,6 +94,11 @@ def upload(wildbook: Wildbook = world[Wildbook]):
         match_score=match_score,
     )
 
+# Handle the request to list seals stored inside the database
+@inject
+@app.route("/seal", methods=["GET"])
+def upload(wildbook: Wildbook = world[Wildbook]):
+    ...
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -152,6 +152,24 @@ class Wildbook:
         annotations_id = self.get_annotation_id(annotations_uuid)
 
         return annotations_id
+    
+    # Method to return Annotation's Name
+    def get_annotation_name(self, annot_id: str):
+        endpoint = f"{self.base_url}/api/annot/name/text/"
+        payload = {
+            "aid_list": [annot_id]
+        }
+
+        response = requests.get(endpoint, json=payload)
+        response_json = response.json()
+
+        status = response_json.get("status")
+        if not status.get("success", None):
+            return Exception(status.get("message"))
+
+        seal_name: str = response_json["response"][0]
+
+        return seal_name
 
     # Method to return Annotation's Image URL
     def get_annotation_image(self, annot_id: str):
