@@ -20,7 +20,9 @@
         </div>
         
         <div class="image-container">
+            {% if match_aid %}
             <img src="data:image/jpeg;base64,{{ matched_image }}" alt="Matched Image">
+             {% endif %}
         </div>
     </div>
 </body>
