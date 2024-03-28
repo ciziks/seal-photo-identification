@@ -1,0 +1,25 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Align items to the left */
+    padding-left: 10px; /* Add some padding to the left */
+    text-align: left; /* Align text to the left */
+    height: auto; /* Adjust height to content */
+    margin-top: 20px; /* Add some margin at the top */
+}
+
+.image-container img {
+    max-width: 90%; /* Adjust the width of images to not take the full page width */
+    margin-bottom: 10px; /* Add some space between the image and the text */
+}
+
+.text-container {
+    margin: 20px 0; /* Add some space above and below the text */
+}
+
+/* Additional styles */
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}

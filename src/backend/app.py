@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for
+import base64
+from io import BytesIO
+from flask import Flask, render_template, request, redirect, send_file, url_for
 from antidote import world, inject
 from wrappers.Wildbook import Wildbook
 from flask_swagger_ui import get_swaggerui_blueprint
@@ -47,16 +49,46 @@ def upload(wildbook: Wildbook = world[Wildbook]):
     temp_image_path = "path_to_temp_storage" 
     image.save(temp_image_path)
 
+    # Upload image
     image_id = wildbook.upload_image(temp_image_path)
     
+    # Detect the seal in the image
     aid_list = wildbook.detect_seal([int(image_id)])
 
+    # Set the name of the seal
     wildbook.rename_annotations(aid_list, [image_name])  # Rename the uploaded image with the provided name
     
+
+    # Match seal with seals in DB
     score = wildbook.seal_matching(aid_list[0])
 
-    # Handle the response
-    return str(score)
+    # Find aid and score for best match
+    try:
+        match_aid, match_score = next(iter(score.items()))
+    except StopIteration:
+
+    # Handle the case where there are no items
+        match_aid, match_score = None, None
+
+    # Get the uploaded image
+    initial_image = wildbook.get_annotation_image(aid_list[0])
+
+    # If there is a match, get the 'best match' image
+    if match_aid:
+        matched_image = wildbook.get_annotation_image(match_aid)
+        matched_image_base64 = matched_image.split(",", 1)[1]  # Remove the prefix
+    else:
+    # If there is no match, set a placeholder 
+        matched_image_base64 = None
+
+    # Encode the initial as base64 for embedding in HTML
+    initial_image_base64 = initial_image.split(",", 1)[1]  # Remove the prefix
+
+    return render_template("confirmation.html", 
+                           initial_image=initial_image_base64,
+                           matched_image=matched_image_base64,
+                           match_aid = match_aid,
+                           match_score=match_score)
 
 if __name__ == "__main__":
     app.run(debug=True)
