@@ -1,29 +1,44 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
+  <head>
     <title>Confirmation</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/confirmation.css') }}">
-</head>
-<body>
-    <div style="display: flex; justify-content: space-between; height: 100vh;">
-        <div class="image-container">
-            <img src="data:image/jpeg;base64,{{ initial_image }}" alt="Initial Image">
-        </div>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/confirmation.css') }}"
+    />
+  </head>
+  <body>
+    <div style="display: flex; justify-content: space-between; height: 100vh">
+      <div class="image-container">
+        <img
+          src="data:image/jpeg;base64,{{ initial_image }}"
+          alt="Initial Image"
+        />
+      </div>
 
-        <div class="container">
-            <a href="/"><button class="Button">Go Back</button></a>
-            {% if match_aid %}
-                <p>Matched with seal with Annotation id: {{ match_aid }}, with score {{ match_score }}</p>
-            {% else %}
-                <p>No matches found. This is normal if this was the first uploaded image :></p>
-            {% endif %}
-        </div>
-        
-        <div class="image-container">
-            {% if match_aid %}
-            <img src="data:image/jpeg;base64,{{ matched_image }}" alt="Matched Image">
-             {% endif %}
-        </div>
+      <div class="container">
+        <a href="/"><button class="Button">Go Back</button></a>
+        {% if match_aid %}
+        <p>
+          Matched with seal with Annotation id: {{ match_aid }}, with score {{
+          match_score }}
+        </p>
+        {% else %}
+        <p>
+          No matches found. This is normal if this was the first uploaded image
+          :>
+        </p>
+        {% endif %}
+      </div>
+
+      <div class="image-container">
+        {% if match_aid %}
+        <img
+          src="data:image/jpeg;base64,{{ matched_image }}"
+          alt="Matched Image"
+        />
+        {% endif %}
+      </div>
     </div>
-</body>
+  </body>
 </html>

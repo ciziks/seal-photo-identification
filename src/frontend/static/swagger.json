@@ -13,7 +13,7 @@
       "/": {
         "get": {
           "summary": "Home page",
-          "description": "Returns the landing page HTML.",
+          "description": "Returns the menu page HTML.",
           "responses": {
             "200": {
               "description": "HTML page returned successfully."
@@ -21,9 +21,9 @@
           }
         }
       },
-      "/upload_form": {
+      "/seal_form": {
         "get": {
-          "summary": "Upload form page",
+          "summary": "Upload seal form page",
           "description": "Returns the HTML page for uploading images.",
           "responses": {
             "200": {
@@ -32,9 +32,9 @@
           }
         }
       },
-      "/upload_image": {
+      "/seal": {
         "post": {
-          "summary": "Upload an image",
+          "summary": "Create new Seal from Detection",
           "description": "Uploads an image for seal detection and matching.",
           "consumes": [
             "multipart/form-data"

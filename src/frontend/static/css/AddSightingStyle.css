@@ -23,47 +23,46 @@ body {
 .drop-message {
   font-size: 18px;
   color: lightskyblue;
-
 }
 
 .ButtonInput {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: lightskyblue;
-    color: white;
-    padding: 15px 30px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    font-size: 16px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: lightskyblue;
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 16px;
 }
 
 .ButtonInput:hover {
-    background-color: deepskyblue;
+  background-color: deepskyblue;
 }
 
-.input-bar{
-     width: 300px;
-     height: 20px;
-     border: 2px solid lightskyblue;
-     border-radius: 5px;
-     padding: 10px;
-     font-size: 16px;
-     outline: none;
-     top: 50%;
-     left: 50%;
-     transform: translate(60%, 100%);
+.input-bar {
+  width: 300px;
+  height: 20px;
+  border: 2px solid lightskyblue;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 16px;
+  outline: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(60%, 100%);
 }
 
 .input-bar:hover {
-    border-color: deepskyblue;
+  border-color: deepskyblue;
 }
 
 .input-bar:focus {
-    background-color: deepskyblue;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  background-color: deepskyblue;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 #imagePreview {
@@ -80,16 +79,16 @@ body {
 }
 
 #imageContainer {
-    white-space: nowrap;
-    overflow-x: auto;
+  white-space: nowrap;
+  overflow-x: auto;
 }
 
 .dropped-image {
-    max-height: 150px;
-    width: auto;
-    margin-right: 20px;
-    border: 2px solid #ccc;
-    padding: 5px;
+  max-height: 150px;
+  width: auto;
+  margin-right: 20px;
+  border: 2px solid #ccc;
+  padding: 5px;
 }
 
 .detect-seal-btn {

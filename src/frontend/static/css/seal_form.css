@@ -1,0 +1,53 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: "Arial", sans-serif;
+  background-color: #f0f8ff;
+}
+
+.Menu {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.Button {
+  background-color: lightskyblue;
+  padding: 14px 40px;
+  border-radius: 8px;
+  border: 1px solid black;
+  color: black;
+  font-size: 18px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.Button:hover {
+  background-color: deepskyblue;
+  color: white;
+}
+
+/* Adding some additional styles for links to remove underlines and adjust color */
+a {
+  text-decoration: none;
+  color: inherit; /* Inherit the text color from the parent element */
+}
+
+/* Style for the title in the head of the page */
+.title {
+  font-size: 2em;
+  color: #1e90ff; /* Dodgerblue, which complements the button colors */
+  text-align: center;
+  margin-bottom: 20px;
+}
