@@ -15,7 +15,7 @@ def home():
 #Handle Get request to open new Html page
 @app.route("/upload_form")
 def upload_form():
-    return render_template("AddSighting.html")
+    return render_template("upload_image.html")
 
 #Handle the Image Upload
 @inject
