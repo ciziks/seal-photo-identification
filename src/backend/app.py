@@ -1,12 +1,25 @@
 from flask import Flask, render_template, request, redirect, url_for
 from antidote import world, inject
 from wrappers.Wildbook import Wildbook
+from flask_swagger_ui import get_swaggerui_blueprint
 import os
 
 app = Flask(__name__,
             template_folder=os.path.join(os.pardir, 'frontend', 'templates'),
             static_folder=os.path.join(os.pardir, 'frontend', 'static'))
 
+SWAGGER_URL = '/swagger'  
+API_URL = '/static/swagger.json'  
+
+swaggerui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={  
+        'app_name': "Seal Center API"
+    }
+)
+
+app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
 @app.route("/")
 def home():

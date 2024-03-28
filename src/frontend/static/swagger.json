@@ -1,0 +1,73 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "title": "Seal Center API",
+      "version": "1.0.0"
+    },
+    "host": "localhost:5000",
+    "basePath": "/",
+    "schemes": [
+      "http"
+    ],
+    "paths": {
+      "/": {
+        "get": {
+          "summary": "Home page",
+          "description": "Returns the landing page HTML.",
+          "responses": {
+            "200": {
+              "description": "HTML page returned successfully."
+            }
+          }
+        }
+      },
+      "/upload_form": {
+        "get": {
+          "summary": "Upload form page",
+          "description": "Returns the HTML page for uploading images.",
+          "responses": {
+            "200": {
+              "description": "HTML page returned successfully."
+            }
+          }
+        }
+      },
+      "/upload_image": {
+        "post": {
+          "summary": "Upload an image",
+          "description": "Uploads an image for seal detection and matching.",
+          "consumes": [
+            "multipart/form-data"
+          ],
+          "parameters": [
+            {
+              "name": "image",
+              "in": "formData",
+              "required": true,
+              "type": "file",
+              "description": "The image file to upload."
+            },
+            {
+              "name": "image_name",
+              "in": "formData",
+              "required": true,
+              "type": "string",
+              "description": "The name for the image."
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Image processed and score returned."
+            },
+            "400": {
+              "description": "Invalid input."
+            },
+            "500": {
+              "description": "Internal server error."
+            }
+          }
+        }
+      }
+    }
+  }
+  
