@@ -99,9 +99,12 @@ def new_seal(wildbook: Wildbook = world[Wildbook]):
 @inject
 @app.route("/list_seals")
 def list_seals(wildbook: Wildbook = world[Wildbook]):
+
+    #Get the list of aids
     seal_aids = wildbook.list_annotations_id()
     seals_data = []
 
+    # Get name and image for each Aid
     for aid in seal_aids:
         try:
             seal_name = wildbook.get_annotation_name(aid)
@@ -112,6 +115,7 @@ def list_seals(wildbook: Wildbook = world[Wildbook]):
         except Exception as e:
             print(f"An error occurred: {e}") 
 
+    # Return template with the data
     return render_template("list_seals.html", seals=seals_data)
 
 
