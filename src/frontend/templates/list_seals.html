@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List of Seals</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/list_seals.css') }}">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-teal.css">
+</head>
+<body>
+    <div class="w3-bar w3-theme">
+        <a href="/" class="w3-bar-item w3-button w3-padding-16">Home</a>
+      </div>
+
+    <div class="seals-container">
+        {% for seal in seals %}
+            <div class="seal-entry">
+                <img src="{{ seal['image_url'] }}" alt="{{ seal['name'] }}" class="seal-image">
+                <div class="seal-name">{{ seal['name'] }}</div>
+            </div>
+        {% else %}
+            <p>No seals to display.</p>
+        {% endfor %}
+    </div>
+</body>
+</html>

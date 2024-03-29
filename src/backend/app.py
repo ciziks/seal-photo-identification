@@ -92,13 +92,28 @@ def new_seal(wildbook: Wildbook = world[Wildbook]):
         matched_image=matched_image_base64,
         match_aid=match_aid,
         match_score=match_score,
+        initial_aid=aid_list[0]
     )
 
 # Handle the request to list seals stored inside the database
 @inject
-@app.route("/seal", methods=["GET"])
-def upload(wildbook: Wildbook = world[Wildbook]):
-    ...
+@app.route("/list_seals")
+def list_seals(wildbook: Wildbook = world[Wildbook]):
+    seal_aids = wildbook.list_annotations_id()
+    seals_data = []
+
+    for aid in seal_aids:
+        try:
+            seal_name = wildbook.get_annotation_name(aid)
+            image_url = wildbook.get_annotation_image(aid)
+
+            seal = {'name': seal_name, 'image_url': image_url}
+            seals_data.append(seal)
+        except Exception as e:
+            print(f"An error occurred: {e}") 
+
+    return render_template("list_seals.html", seals=seals_data)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

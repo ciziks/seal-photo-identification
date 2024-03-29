@@ -1,0 +1,27 @@
+/* list_seals.css */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow-x: hidden; /
+}
+
+.seals-container {
+    width: 100%;
+    height: 100%;
+}
+
+.seal-entry {
+    display: flex;
+    align-items: center;
+    margin: 20px;
+}
+
+.seal-image {
+    max-height: 150px; 
+    margin-right: 20px;
+}
+
+.seal-name {
+    font-size: 1.2em;
+}
