@@ -1,73 +1,86 @@
 {
-    "swagger": "2.0",
-    "info": {
-      "title": "Seal Center API",
-      "version": "1.0.0"
+  "swagger": "2.0",
+  "info": {
+    "title": "Seal Center API",
+    "version": "1.1.0"  
+  },
+  "host": "127.0.0.1:5000",
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Home page",
+        "description": "Returns the menu page HTML.",
+        "responses": {
+          "200": {
+            "description": "HTML page returned successfully."
+          }
+        }
+      }
     },
-    "host": "localhost:5000",
-    "basePath": "/",
-    "schemes": [
-      "http"
-    ],
-    "paths": {
-      "/": {
-        "get": {
-          "summary": "Home page",
-          "description": "Returns the menu page HTML.",
-          "responses": {
-            "200": {
-              "description": "HTML page returned successfully."
-            }
+    "/seal_form": {
+      "get": {
+        "summary": "Upload seal form page",
+        "description": "Returns the HTML page for uploading images.",
+        "responses": {
+          "200": {
+            "description": "HTML page returned successfully."
           }
         }
-      },
-      "/seal_form": {
-        "get": {
-          "summary": "Upload seal form page",
-          "description": "Returns the HTML page for uploading images.",
-          "responses": {
-            "200": {
-              "description": "HTML page returned successfully."
-            }
+      }
+    },
+    "/seal": {
+      "post": {
+        "summary": "Create new Seal from Detection",
+        "description": "Uploads an image for seal detection and matching.",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "image",
+            "in": "formData",
+            "required": true,
+            "type": "file",
+            "description": "The image file to upload."
+          },
+          {
+            "name": "image_name",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": "The name for the image."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image processed and score returned."
+          },
+          "400": {
+            "description": "Invalid input."
+          },
+          "500": {
+            "description": "Internal server error."
           }
         }
-      },
-      "/seal": {
-        "post": {
-          "summary": "Create new Seal from Detection",
-          "description": "Uploads an image for seal detection and matching.",
-          "consumes": [
-            "multipart/form-data"
-          ],
-          "parameters": [
-            {
-              "name": "image",
-              "in": "formData",
-              "required": true,
-              "type": "file",
-              "description": "The image file to upload."
-            },
-            {
-              "name": "image_name",
-              "in": "formData",
-              "required": true,
-              "type": "string",
-              "description": "The name for the image."
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Image processed and score returned."
-            },
-            "400": {
-              "description": "Invalid input."
-            },
-            "500": {
-              "description": "Internal server error."
-            }
+      }
+    },
+    "/list_seals": {
+      "get": {
+        "summary": "List all seals",
+        "description": "Returns a list of all seals stored in the database, including their names and image URLs.",
+        "responses": {
+          "200": {
+            "description": "List of seals returned successfully."
+          },
+          "500": {
+            "description": "Internal server error."
           }
         }
       }
     }
   }
-  
+}
