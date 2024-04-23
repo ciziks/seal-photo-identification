@@ -18,8 +18,7 @@ def read_item(item_id: int, q: Union[str, None] = None):
 
 # Create Seal
 @app.get("/seal")
-def new_seal(wildbook=Depends(Wildbook)):
-    ...
+def new_seal(wildbook=Depends(Wildbook)): ...
 
 
 # Read Single Seal
@@ -40,3 +39,23 @@ def update_seal(seal_id: str, wildbook=Depends(Wildbook)): ...
 # Delete Seal
 @app.delete("/seal/{seal_id}")
 def remove_seal(seal_id: str, wildbook=Depends(Wildbook)): ...
+
+
+# Create Sighting
+@app.post("/sighting")
+def add_sighting(wildbook=Depends(Wildbook)): ...
+
+
+# Read Sighting
+@app.get("/sighting/{sighting_id}")
+def get_sighting(sighting_id: str, wildbook=Depends(Wildbook)): ...
+
+
+# Update Sighting
+@app.put("/sighting/{sighting_id}")
+def edit_sighting(sighting_id: str, wildbook=Depends(Wildbook)): ...
+
+
+# Delete Sighting
+@app.delete("/sighting/{sighting_id}")
+def remove_sighting(sighting_id: str, wildbook=Depends(Wildbook)): ...
