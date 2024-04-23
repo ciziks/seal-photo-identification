@@ -1,6 +1,5 @@
 from typing import Union
-from antidote import world, inject
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 
 from .wrappers.Wildbook import Wildbook
 
@@ -15,3 +14,29 @@ def read_root():
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
+
+
+# Create Seal
+@app.get("/seal")
+def new_seal(wildbook=Depends(Wildbook)):
+    ...
+
+
+# Read Single Seal
+@app.get("/seal/{seal_id}")
+def read_seal(seal_id: str, wildbook=Depends(Wildbook)): ...
+
+
+# List Seals
+@app.get("/seals")
+def list_seals(wildbook=Depends(Wildbook)): ...
+
+
+# Update Seals
+@app.put("/seal/{seal_id}")
+def update_seal(seal_id: str, wildbook=Depends(Wildbook)): ...
+
+
+# Delete Seal
+@app.delete("/seal/{seal_id}")
+def remove_seal(seal_id: str, wildbook=Depends(Wildbook)): ...

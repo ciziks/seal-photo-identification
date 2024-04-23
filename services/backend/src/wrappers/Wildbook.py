@@ -1,9 +1,7 @@
 from typing import List, Tuple
-from antidote import injectable
 import requests
 
 
-@injectable
 class Wildbook:
     def __init__(self) -> None:
         self.base_url = "http://localhost:84"
@@ -11,13 +9,14 @@ class Wildbook:
     # Method to check if WildBook API is properly running
     def is_running(self) -> bool:
         endpoint = f"{self.base_url}/api/test/helloworld/"
-        response = requests.get(endpoint).json()
-        response_obj = response.json()
+        try:
+            response = requests.get(endpoint).json()
+            response_obj = response.json()
 
-        status = response_obj["status"]
-        if status:
+            status = response_obj["status"]
             return status.get("success")
-        return False
+        except:
+            return False
 
     # Method to upload an image in WildBook's Database
     def upload_image(self, image_path: str) -> str:
@@ -152,13 +151,11 @@ class Wildbook:
         annotations_id = self.get_annotation_id(annotations_uuid)
 
         return annotations_id
-    
+
     # Method to return Annotation's Name
     def get_annotation_name(self, annot_id: str):
         endpoint = f"{self.base_url}/api/annot/name/text/"
-        payload = {
-            "aid_list": [annot_id]
-        }
+        payload = {"aid_list": [annot_id]}
 
         response = requests.get(endpoint, json=payload)
         response_json = response.json()
