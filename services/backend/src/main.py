@@ -1,14 +1,22 @@
 from typing import Union
 from fastapi import FastAPI, Depends
-
+from fastapi.middleware.cors import CORSMiddleware
 from .wrappers.Wildbook import Wildbook
 
+
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8080"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return "Hello World"
 
 
 @app.get("/items/{item_id}")
