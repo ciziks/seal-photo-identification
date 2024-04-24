@@ -4,18 +4,19 @@ import requests
 
 class Wildbook:
     def __init__(self) -> None:
-        self.base_url = "http://localhost:84"
+        self.base_url = "http://wildbook:5000"
 
     # Method to check if WildBook API is properly running
     def is_running(self) -> bool:
         endpoint = f"{self.base_url}/api/test/helloworld/"
         try:
-            response = requests.get(endpoint).json()
+            response = requests.get(endpoint)
             response_obj = response.json()
 
             status = response_obj["status"]
             return status.get("success")
-        except:
+        except Exception as e:
+            print(e)
             return False
 
     # Method to upload an image in WildBook's Database

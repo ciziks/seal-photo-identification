@@ -15,8 +15,9 @@ app.add_middleware(
 
 
 @app.get("/")
-def read_root():
-    return "Hello World"
+def read_root(wildbook: Wildbook = Depends(Wildbook)):
+    wildbook_running = wildbook.is_running()
+    return {"text": "Hello World", "wildbook": wildbook_running}
 
 
 # Create Seal (MVP)

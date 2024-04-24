@@ -1,19 +1,25 @@
-version: '3.8'
+version: "3.8"
 
 services:
-
   backend:
     build: ./services/backend
     ports:
       - 5001:5001
     volumes:
       - ./services/backend:/app
+    depends_on:
+      - wildbook
     command: uvicorn src.main:app --reload --host 0.0.0.0 --port 5001
 
   frontend:
     build: ./services/frontend
     volumes:
-      - './services/frontend:/app'
-      - '/app/node_modules'
+      - "./services/frontend:/app"
+      - "/app/node_modules"
     ports:
       - 8080:8080
+
+  wildbook:
+    image: wildme/wbia:latest
+    ports:
+      - 84:5000
