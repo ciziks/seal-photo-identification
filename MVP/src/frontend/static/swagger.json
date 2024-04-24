@@ -4,7 +4,7 @@
     "title": "Seal Center API",
     "version": "1.1.0"  
   },
-  "host": "127.0.0.1:5000",
+  "host": "127.0.0.1:5001",
   "basePath": "/",
   "schemes": [
     "http"
