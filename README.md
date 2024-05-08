@@ -16,14 +16,7 @@ Currently, the repository contains the Minimum Viable Product (MVP) for our proj
 
 ## How to Run
 
-With Docker Desktop running, the first step is to download WildBook's Image. The WBIA software is built and deployed as a Docker image wildme/wbia. You can download and run the pre-configured instance from the command line using:
+With Docker Desktop running, the first step is to download WildBook's Image. The WBIA software is built and deployed as a Docker image wildme/wbia. After git cloning this repository, execute the follow command on the main directory to build the application container:
 ```
-# Install Docker - https://docs.docker.com/engine/install/
-docker pull wildme/wbia:latest
-docker run -p 84:5000 wildme/wbia:latest bash
-```
-
-Then, after git cloning this repository, execute the follow command on the main directory to run the application locally:
-```
-poetry run python3 src/backend/app.py
+docker-compose up -d --build
 ```
