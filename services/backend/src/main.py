@@ -1,7 +1,7 @@
 from typing import Union
-from fastapi import FastAPI, Depends, File, UploadFile
+from fastapi import FastAPI, Depends, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
-from wrappers.Wildbook import Wildbook
+from .wrappers.Wildbook import Wildbook
 import os
 
 
@@ -23,7 +23,9 @@ def read_root(wildbook: Wildbook = Depends(Wildbook)):
 # Upload seal without detection
 @app.post("/seal/image")
 async def upload_seal(
-    image: UploadFile = File(...), wildbook: Wildbook = Depends(Wildbook)
+    image: UploadFile = File(...),
+    name: str = Form(...),
+    wildbook: Wildbook = Depends(Wildbook)
 ):
     if not image:  # Check for image
         return "No Image uploaded"
@@ -38,6 +40,14 @@ async def upload_seal(
 
     # Clean up after upload
     os.remove(temp_image_path)
+
+    # Detect the seal in the image
+    aid_list = wildbook.detect_seal([int(image_id)])
+
+    #Set the name of the seal
+    wildbook.rename_annotations(
+            aid_list, [name]
+        )
 
     return {"status": "success", "image_id": image_id} 
 

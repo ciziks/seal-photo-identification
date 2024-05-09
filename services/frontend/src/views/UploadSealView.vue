@@ -56,7 +56,7 @@
         formData.append('image', this.file);
         formData.append('name', this.name);  // Add the name to the FormData object
   
-        axios.post('http://localhost:5001/upload-seal', formData, {
+        axios.post('http://localhost:5001/seal/image', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -64,7 +64,7 @@
         .then(response => {
           console.log('File uploaded successfully', response);
           alert('File uploaded successfully');
-          this.$router.push('/upload-seal');
+          this.$router.push('/');
         })
         .catch(error => {
           console.error('Error uploading the file', error);
