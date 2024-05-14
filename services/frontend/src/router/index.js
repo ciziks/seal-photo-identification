@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import AddSightingView from '../views/UploadSealView.vue';
-
+import AddSealView from '../views/UploadSealView.vue';
+import DetectSealView from '../views/DetectSealView';
 const routes = [
   {
     path: '/',
@@ -19,7 +19,12 @@ const routes = [
   {
     path: '/upload-seal',
     name: 'upload-seal',
-    component: AddSightingView
+    component: AddSealView
+  },
+  {
+    path: '/detect-seal',
+    name: 'detect-seal',
+    component: DetectSealView
   }
 ]
 

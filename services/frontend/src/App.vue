@@ -5,6 +5,7 @@
         <img src="@/assets/images/logo_64x64.jpeg" alt="Logo" class="logo"/>
       </router-link>
       <router-link to="/upload-seal" class="btn btn-primary">Upload seal</router-link>
+      <router-link to="/detect-seal" class="btn btn-primary">Detect seal</router-link>
     </div>
     <div class="content">
       <router-view/>
