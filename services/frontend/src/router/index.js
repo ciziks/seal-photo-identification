@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import AddSealView from '../views/UploadSealView.vue';
 import DetectSealView from '../views/DetectSealView';
+import ListSealsView from '../views/ListSealsView';
+
 const routes = [
   {
     path: '/',
@@ -25,6 +27,11 @@ const routes = [
     path: '/detect-seal',
     name: 'detect-seal',
     component: DetectSealView
+  },
+  {
+    path: '/list-seals',
+    name: 'list-seals',
+    component: ListSealsView
   }
 ]
 

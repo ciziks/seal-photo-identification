@@ -6,6 +6,7 @@
       </router-link>
       <router-link to="/upload-seal" class="btn btn-primary">Upload seal</router-link>
       <router-link to="/detect-seal" class="btn btn-primary">Detect seal</router-link>
+      <router-link to="/list-seals" class="btn btn-primary">List seals</router-link>
     </div>
     <div class="content">
       <router-view/>
