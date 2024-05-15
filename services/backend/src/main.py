@@ -1,6 +1,7 @@
 from typing import Union
 from fastapi import FastAPI, Depends, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
+import sqlite3
 from .wrappers.Wildbook import Wildbook
 import os
 
@@ -18,7 +19,16 @@ app.add_middleware(
 @app.get("/")
 def read_root(wildbook: Wildbook = Depends(Wildbook)):
     wildbook_running = wildbook.is_running()
-    return {"text": "Hello World", "wildbook": wildbook_running}
+
+    connection = sqlite3.connect("sealcenter.db")
+    connection.row_factory = sqlite3.Row 
+    cursor = connection.cursor()
+    
+    cursor.execute("SELECT * FROM Seals LIMIT 1")
+    row = cursor.fetchone()
+    connection.close()
+    
+    return {"text": "Hello World", "wildbook": wildbook_running, "db": dict(row) if row else "No data found"}
 
 # Upload seal without detection
 @app.post("/seal/image")
