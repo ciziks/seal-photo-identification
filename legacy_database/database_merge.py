@@ -1,6 +1,3 @@
-from typing import List, Tuple
-from antidote import inject
-import requests
 import os
 from services.backend.src.wrappers.Wildbook import Wildbook
 import pandas as pd
@@ -61,4 +58,4 @@ def upload_files(root_dir):
     return annot_ids
             
 
-annot_ids = upload_files("/Users/luukw/Documents/Rijksuniversiteit Groningen/Computing Science/Year 2/Software Engineering/Project/seal_demo/newpic")
+annot_ids = upload_files(...)
