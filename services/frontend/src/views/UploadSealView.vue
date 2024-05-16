@@ -95,6 +95,7 @@ export default {
       .then(response => {
         this.isLoading = false;
         alert('File uploaded successfully!');
+        console.log(response.toString());
         this.croppedImage = null; // Clear cropped image after uploading
       })
       .catch(error => {
@@ -110,10 +111,22 @@ export default {
 .drop-area {
   cursor: pointer;
 }
-.preview img {
-  width: 100%;
-  max-width: 400px;
+.preview {
+  width: 60%; /* Ensure the container is full width for responsiveness */
+  display: flex; /* Center the image within the preview div */
+  justify-content: center; /* Align horizontally at the center */
+  align-items: center; /* Align vertically at the center */
+  height: auto; /* Height should be auto to adjust based on content */
 }
+
+.preview img {
+  max-width: 200px; /* Further reduce the max width */
+  max-height: 150px; /* Adjust the max height */
+  object-fit: contain;
+  border: 1px solid #ccc; /* Optional: adds a border around the image for better visibility */
+}
+
+
 input[type="text"] {
   font-size: 16px; 
 }

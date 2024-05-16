@@ -29,7 +29,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: fixed; 
+  left: 0; /* Ensures the sidebar is aligned to the left edge of the viewport */
+  top: 0; /* Aligns the sidebar to the top of the viewport */
 }
+
 .logo {
   margin-top: 10px;
   width: 64px; /* Adjust size as needed */
@@ -38,6 +42,7 @@
   flex: 1;
   text-align: left;
   padding: 20px;
+  margin-left: 220px; /* Adjust this value to match the sidebar's width plus any desired spacing */
 }
 .btn {
   margin-top: 20px;
