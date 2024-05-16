@@ -57,12 +57,10 @@ async def upload_seal(
     os.remove(temp_image_path)
 
     # Get Image Size
-    image_size = [0, 0] + wildbook.get_image_size(image_id)
-    print(image_size)
+    image_size = [0, 0] + list(wildbook.get_images_size(image_id)[0])
 
     # Detect the seal in the image
-    aid_list = wildbook.create_annotation(image_id, image_size, name)
-    print(aid_list)
+    aid_list = wildbook.create_annotations([image_id], [image_size], [name])
 
     return {"status": "success", "annotation_id": aid_list}
 

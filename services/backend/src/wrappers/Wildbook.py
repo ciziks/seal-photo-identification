@@ -33,8 +33,7 @@ class Wildbook:
         image_id = response_json.get("response")
         return str(image_id)
 
-        # Method to remove image from DB
-
+    # Method to remove image from DB
     def remove_image(self, image_uuid_list: List[str]) -> None:
         endpoint = f"{self.base_url}/api/image/json/"
         payload = {"image_uuid_list": image_uuid_list}
@@ -76,10 +75,10 @@ class Wildbook:
         return [uuid["__UUID__"] for uuid in response_json.get("response", None)]
 
     # Method to get Image's height and width through its ID
-    def get_image_size(self, image_id: str):
+    def get_images_size(self, image_id_list: List[str]):
         endpoint_height = f"{self.base_url}/api/image/height/"
         endpoint_width = f"{self.base_url}/api/image/width/"
-        payload = {"gid_list": [image_id]}
+        payload = {"gid_list": image_id_list}
 
         response_height = requests.get(endpoint_height, params=payload)
         response_height_json = response_height.json()
@@ -93,21 +92,18 @@ class Wildbook:
         if status_height or status_width:
             return Exception("Error in Height or Width Request from WildBook")
 
-        return [
-            response_width_json.get("response")[0],
-            response_height_json.get("response")[0],
-        ]
+        return list(zip(response_width_json.get("response"), response_height_json.get("response")))
 
-    # Method to manually create a WildBook annotation from an image
-    def create_annotation(
-        self, image_id: str, box_list: List[int], name: str
+    # Method to manually create WildBook annotation
+    def create_annotations(
+        self, image_id_list: List[str], box_list: List[List[int]], name_list: List[str]
     ) -> str:
         endpoint = f"{self.base_url}/api/annot/"
         annotation = {
-            "gid_list": [image_id],
-            "bbox_list": [box_list],
-            "theta_list": [0],
-            "name_list": [name],
+            "gid_list": image_id_list,
+            "bbox_list": box_list,
+            "theta_list": [0] * len(image_id_list),
+            "name_list": name_list,
         }
 
         response = requests.post(endpoint, json=annotation)
@@ -117,9 +113,9 @@ class Wildbook:
         if not status.get("success", None):
             return Exception(status.get("message"))
 
-        annotation_id = response_json["response"][0]
+        annotation_ids = response_json["response"]
 
-        return annotation_id
+        return annotation_ids
 
     # Method to get Annotation ID through its UUID
     def get_annotation_id(self, uuid_list: List[str]):
