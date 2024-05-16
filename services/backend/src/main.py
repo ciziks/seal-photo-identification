@@ -147,7 +147,6 @@ def list_seals(wildbook: Wildbook = Depends(Wildbook)):
         annotation_image = wildbook.get_annotation_image(aid)
 
         if seal_images.get(seal_name, None):
-            print("teste")
             seal_images[seal_name].append(annotation_image)
         else:
             seal_images[seal_name] = [annotation_image]
