@@ -57,15 +57,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%; /* Ensure the main container takes full width */
+  width: 100%;
+  padding: 10px; /* Additional padding to ensure space around the items */
 }
 
 .seal {
+  width: 100%; /* Full width of the container to use maximum space */
   border: 1px solid #ccc;
+  margin: 20px 0; /* Vertical margin for separation */
   padding: 20px;
-  margin: 20px;
-  width: 90%; /* Use most of the screen width while leaving some margin */
-  box-sizing: border-box; /* Include padding and border in the width calculation */
+  box-sizing: border-box; /* Padding and border included in width calculation */
 }
 
 .seal-header {
@@ -78,19 +79,20 @@
 .seal-images {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  overflow-x: auto; /* Allows horizontal scrolling if needed */
-  width: calc(100% - 40px); /* Adjust for padding */
-  padding-right: 20px; /* Add padding to ensure space for the scrollbar or the edge of the container */
+  overflow-x: auto; /* Enables horizontal scrolling */
+  width: 100%;
+  margin-top: 10px; /* Space above the image row */
+  padding-right: 20px; /* Right padding to ensure no image is cut off */
 }
 
 .seal-images img {
-  flex: 0 0 auto; /* Allow images to grow or shrink based on their content size */
-  max-height: 200px; /* Larger display height */
-  object-fit: contain; /* Ensure images are fully visible without cropping */
+  height: 150px; /* Fixed height for all images */
+  width: auto; /* Width auto to maintain aspect ratio */
+  flex: 0 0 auto; /* Do not grow or shrink, use image's native size */
+  object-fit: contain; /* Ensure full image is visible */
   margin-right: 10px; /* Space between images */
 }
+
 
   </style>
   
