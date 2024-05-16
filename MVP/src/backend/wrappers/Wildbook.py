@@ -72,16 +72,13 @@ class Wildbook:
         response_width = requests.get(endpoint_width, params=payload)
         response_width_json = response_width.json()
 
-        status_height = not response_height_json.get("status")
-        status_width = not response_width_json.get("status")
+        status_height = response_height_json.get("status")
+        status_width = response_width_json.get("status")
 
-        if not status_height.get("success", None):
-            return Exception(status_height.get("message"))
+        print(response_height_json)
+        print(response_width_json)
 
-        if not status_width.get("success", None):
-            return Exception(status_width.get("message"))
-
-        return zip(status_width, status_height)
+        return [[0, 0, response_width_json.get("response")[0], response_height_json.get("response")[0]]]
 
     # Method to remove image from database
     def remove_image(self, image_uuid_list: List[str]) -> None:
