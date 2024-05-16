@@ -21,49 +21,51 @@ def read_root(wildbook: Wildbook = Depends(Wildbook)):
     wildbook_running = wildbook.is_running()
 
     connection = sqlite3.connect("sealcenter.db")
-    connection.row_factory = sqlite3.Row 
+    connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
-    
+
     cursor.execute("SELECT * FROM Seals LIMIT 1")
     row = cursor.fetchone()
     connection.close()
-    
-    return {"text": "Hello World", "wildbook": wildbook_running, "db": dict(row) if row else "No data found"}
+
+    return {
+        "text": "Hello World",
+        "wildbook": wildbook_running,
+        "db": dict(row) if row else "No data found",
+    }
+
 
 # Upload seal without detection
 @app.post("/seal/image")
 async def upload_seal(
     image: UploadFile = File(...),
     name: str = Form(...),
-    wildbook: Wildbook = Depends(Wildbook)
+    wildbook: Wildbook = Depends(Wildbook),
 ):
     if not image:  # Check for image
         return "No Image uploaded"
-    
+
     # Save the file temporarily
     temp_image_path = "path_to_temp_storage"
     with open("path_to_temp_storage", "wb") as f:
         f.write(await image.read())
 
     # Upload image
-    image_id = wildbook.upload_image(temp_image_path)
+    image_id = int(wildbook.upload_image(temp_image_path))
 
     # Clean up after upload
     os.remove(temp_image_path)
 
-    image_uuid = wildbook.get_images_uuids([int(image_id)])
-
-    image_size = wildbook.get_images_size([int(image_id)])
+    # Get Image Size
+    image_size = [0, 0] + wildbook.get_image_size(image_id)
+    print(image_size)
 
     # Detect the seal in the image
-    aid_list = wildbook.create_annotation(image_uuid, image_size)
+    aid_list = wildbook.create_annotation(image_id, image_size, name)
+    print(aid_list)
 
-    #Set the name of the seal
-    wildbook.rename_annotations(
-            aid_list, [name]
-        )
+    return {"status": "success", "annotation_id": aid_list}
 
-    return {"status": "success", "image_id": image_id} 
 
 # Create Seal (MVP)
 @app.post("/seal")

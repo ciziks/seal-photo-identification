@@ -33,7 +33,22 @@ class Wildbook:
         image_id = response_json.get("response")
         return str(image_id)
 
-    # Method to get Image's ID
+        # Method to remove image from DB
+
+    def remove_image(self, image_uuid_list: List[str]) -> None:
+        endpoint = f"{self.base_url}/api/image/json/"
+        payload = {"image_uuid_list": image_uuid_list}
+
+        response = requests.delete(endpoint, json=payload)
+        response_json = response.json()
+
+        status = response_json.get("status")
+        if not status.get("success", None):
+            return Exception(status.get("message"))
+
+        return
+
+    # Method to get all Image's ID in DB
     def list_images_id(self):
         endpoint = f"{self.base_url}/api/image/"
 
@@ -60,11 +75,11 @@ class Wildbook:
 
         return [uuid["__UUID__"] for uuid in response_json.get("response", None)]
 
-    # Method to get Image's height through its ID
-    def get_images_size(self, image_id_list: List[str]):
+    # Method to get Image's height and width through its ID
+    def get_image_size(self, image_id: str):
         endpoint_height = f"{self.base_url}/api/image/height/"
         endpoint_width = f"{self.base_url}/api/image/width/"
-        payload = {"gid_list": image_id_list}
+        payload = {"gid_list": [image_id]}
 
         response_height = requests.get(endpoint_height, params=payload)
         response_height_json = response_height.json()
@@ -72,37 +87,27 @@ class Wildbook:
         response_width = requests.get(endpoint_width, params=payload)
         response_width_json = response_width.json()
 
-        status_height = response_height_json.get("status")
-        status_width = response_width_json.get("status")
+        status_height = not response_height_json.get("status", None)
+        status_width = not response_width_json.get("status", None)
 
-        print(response_height_json)
-        print(response_width_json)
+        if status_height or status_width:
+            return Exception("Error in Height or Width Request from WildBook")
 
-        return [[0, 0, response_width_json.get("response")[0], response_height_json.get("response")[0]]]
+        return [
+            response_width_json.get("response")[0],
+            response_height_json.get("response")[0],
+        ]
 
-    # Method to remove image from database
-    def remove_image(self, image_uuid_list: List[str]) -> None:
-        endpoint = f"{self.base_url}/api/image/json/"
-        payload = {"image_uuid_list": image_uuid_list}
-
-        response = requests.delete(endpoint, json=payload)
-        response_json = response.json()
-
-        status = response_json.get("status")
-        if not status.get("success", None):
-            return Exception(status.get("message"))
-
-        return
-
-    # Method to manually create WildBook annotations from a list of uploaded images
+    # Method to manually create a WildBook annotation from an image
     def create_annotation(
-        self, image_uuid_list: List[str], box_list: List[Tuple[int]]
-    ) -> List[str]:
-        endpoint = f"{self.base_url}/api/annot/json/"
+        self, image_id: str, box_list: List[int], name: str
+    ) -> str:
+        endpoint = f"{self.base_url}/api/annot/"
         annotation = {
-            "image_uuid_list": image_uuid_list,
-            "annot_bbox_list": box_list,
-            "annot_theta_list": [0] * len(image_uuid_list),
+            "gid_list": [image_id],
+            "bbox_list": [box_list],
+            "theta_list": [0],
+            "name_list": [name],
         }
 
         response = requests.post(endpoint, json=annotation)
@@ -112,10 +117,9 @@ class Wildbook:
         if not status.get("success", None):
             return Exception(status.get("message"))
 
-        annotation_uuids = [
-            uuid["__UUID__"] for uuid in response_json.get("response", None)
-        ]
-        return annotation_uuids
+        annotation_id = response_json["response"][0]
+
+        return annotation_id
 
     # Method to get Annotation ID through its UUID
     def get_annotation_id(self, uuid_list: List[str]):
