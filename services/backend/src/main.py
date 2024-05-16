@@ -141,18 +141,19 @@ def list_seals(wildbook: Wildbook = Depends(Wildbook)):
     seals_data = []
 
     # Get name and image for each Aid
+    seal_images = {}
     for aid in seal_aids:
-        try:
-            seal_name = wildbook.get_annotation_name(aid)
-            image_url = wildbook.get_annotation_image(aid)
+        seal_name = wildbook.get_annotation_name(aid)
+        annotation_image = wildbook.get_annotation_image(aid)
 
-            seal = {"name": seal_name, "image_url": image_url}
-            seals_data.append(seal)
-        except Exception as e:
-            print(f"An error occurred: {e}")
+        if seal_images.get(seal_name, None):
+            print("teste")
+            seal_images[seal_name].append(annotation_image)
+        else:
+            seal_images[seal_name] = [annotation_image]
 
     # Return template with the data
-    return {"seals": seals_data}
+    return seal_images
 
 
 # Update Seals
