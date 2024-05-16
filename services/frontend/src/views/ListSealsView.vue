@@ -3,7 +3,9 @@
       <div v-for="(images, name) in seals" :key="name" class="seal">
         <div class="seal-header">
           <h2>{{ name }}</h2>
-          <button v-if="images.length > 3" @click="nextImages(name)">Next</button>
+          <button v-if="images.length > 3" @click="nextImages(name)" class="next-button">
+          <img src="@/assets/images/right_arrow.png" >
+        </button>
         </div>
         <div class="seal-images">
           <img v-for="(image, index) in getCurrentImages(name)" :key="index" :src="image" alt="Seal" />
@@ -93,6 +95,17 @@
     margin-right: 10px; /* Space between images */
   }
   
-  
+  .next-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.next-button img {
+  width: 125px; /* Adjust size as necessary */
+  height: 125px;
+}
+
     </style>
   
