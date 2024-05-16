@@ -11,21 +11,42 @@
     </div>
     <input type="file" @change="handleFileUpload" ref="fileInput" style="display: none;">
     <input type="text" v-model="name" placeholder="Enter name" style="margin-top: 20px; width: 100%; padding: 8px 16px;">
-    <button @click="uploadImage" :disabled="isLoading">Upload to Server</button>
-    <div v-if="image" class="preview">
-      <img :src="image" alt="Preview" />
+
+    <!-- Cropper Component -->
+    <vue-cropper
+      v-if="image"
+      ref="cropper"
+      :src="image"
+      alt="Source Image"
+      :view-mode="1"
+      :guides="true"
+      :aspect-ratio="16/9"
+      style="margin-top: 20px;"
+    />
+
+    <button @click="getCroppedImage" :disabled="isLoading">Crop Image</button>
+    <button @click="uploadImage" :disabled="isLoading || !croppedImage">Upload to Server</button>
+
+    <div v-if="croppedImage" class="preview">
+      <img :src="croppedImage" alt="Cropped Preview" />
     </div>
     <div v-if="isLoading">Uploading...</div>
   </div>
 </template>
 
 <script>
+import VueCropper from 'vue-cropperjs';
+import 'cropperjs/dist/cropper.css';
 import axios from 'axios';
 
 export default {
+  components: {
+    VueCropper
+  },
   data() {
     return {
       image: null,
+      croppedImage: null,
       file: null,
       name: '',
       isLoading: false
@@ -44,9 +65,16 @@ export default {
       const file = event.dataTransfer.files[0];
       this.handleFileUpload({ target: { files: [file] } });
     },
+    getCroppedImage() {
+      const canvas = this.$refs.cropper.getCroppedCanvas();
+      canvas.toBlob(blob => {
+        this.croppedImage = URL.createObjectURL(blob);
+        this.file = blob; // Update the file to be uploaded
+      });
+    },
     uploadImage() {
       if (!this.file) {
-        alert('Please select a file first.');
+        alert('Please crop the image first.');
         return;
       }
       if (!this.name.trim()) {
@@ -56,7 +84,7 @@ export default {
 
       this.isLoading = true;
       const formData = new FormData();
-      formData.append('image', this.file);
+      formData.append('image', this.file, 'cropped-image.png');
       formData.append('name', this.name);
 
       axios.post('http://localhost:5001/seal/image', formData, {
@@ -65,20 +93,13 @@ export default {
         }
       })
       .then(response => {
-       const { status, image_id } = response.data;
-       console.log('Response status:', status);
-       if (status === "success") {
-         console.log('File uploaded successfully with image ID:', image_id);
-          alert(`File uploaded successfully! Image ID: ${image_id}`);
-          this.resetForm();
-        } else {
-          alert(`Upload failed with status: ${status}`);
-        }
+        this.isLoading = false;
+        alert('File uploaded successfully!');
+        this.croppedImage = null; // Clear cropped image after uploading
       })
       .catch(error => {
-        console.error('Error uploading the file', error);
-        alert('Error uploading the file');
         this.isLoading = false;
+        alert(error.toString());
       });
     }
   }
