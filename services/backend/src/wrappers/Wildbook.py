@@ -1,10 +1,10 @@
 from typing import List, Tuple
 import requests
-
+import json
 
 class Wildbook:
-    def __init__(self) -> None:
-        self.base_url = "http://wildbook:5000"
+    def __init__(self, url: str = "http://wildbook:5000") -> None:
+        self.base_url = url
 
     # Method to check if WildBook API is properly running
     def is_running(self) -> bool:
@@ -31,7 +31,7 @@ class Wildbook:
             return status.get("message")
 
         image_id = response_json.get("response")
-        return str(image_id)
+        return image_id
 
     # Method to remove image from DB
     def remove_image(self, image_uuid_list: List[str]) -> None:
@@ -78,11 +78,10 @@ class Wildbook:
     def get_images_size(self, image_id_list: List[str]):
         endpoint_height = f"{self.base_url}/api/image/height/"
         endpoint_width = f"{self.base_url}/api/image/width/"
-        payload = {"gid_list": image_id_list}
+        payload = {"gid_list": ",".join(map(str, image_id_list))}
 
-        response_height = requests.get(endpoint_height, params=payload)
+        response_height = requests.get(endpoint_height, data=payload)
         response_height_json = response_height.json()
-
         response_width = requests.get(endpoint_width, params=payload)
         response_width_json = response_width.json()
 
@@ -96,7 +95,7 @@ class Wildbook:
 
     # Method to manually create WildBook annotation
     def create_annotations(
-        self, image_id_list: List[str], box_list: List[List[int]], name_list: List[str]
+        self, image_id_list: List[str], box_list: List[List[str]], name_list: List[str]
     ) -> str:
         endpoint = f"{self.base_url}/api/annot/"
         annotation = {

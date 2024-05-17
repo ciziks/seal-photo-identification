@@ -138,7 +138,6 @@ def read_seal(seal_id: str, wildbook: Wildbook = Depends(Wildbook)): ...
 def list_seals(wildbook: Wildbook = Depends(Wildbook)):
     # Get the list of aids
     seal_aids = wildbook.list_annotations_id()
-    seals_data = []
 
     # Get name and image for each Aid
     seal_images = {}
