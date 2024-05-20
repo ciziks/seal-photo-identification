@@ -1,6 +1,7 @@
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 import requests
 import json
+
 
 class Wildbook:
     def __init__(self, url: str = "http://wildbook:5000") -> None:
@@ -91,19 +92,29 @@ class Wildbook:
         if status_height or status_width:
             return Exception("Error in Height or Width Request from WildBook")
 
-        return list(zip(response_width_json.get("response"), response_height_json.get("response")))
+        return list(
+            zip(
+                response_width_json.get("response"),
+                response_height_json.get("response"),
+            )
+        )
 
     # Method to manually create WildBook annotation
     def create_annotations(
-        self, image_id_list: List[str], box_list: List[List[str]], name_list: List[str]
-    ) -> str:
+        self,
+        image_id_list: List[str],
+        box_list: List[List[str]],
+        name_list: Optional[List[str]] = None,
+    ) -> List[str]:
         endpoint = f"{self.base_url}/api/annot/"
         annotation = {
             "gid_list": image_id_list,
             "bbox_list": box_list,
             "theta_list": [0] * len(image_id_list),
-            "name_list": name_list,
         }
+
+        if name_list:
+            annotation["name_list"] = name_list
 
         response = requests.post(endpoint, json=annotation)
         response_json = response.json()
@@ -261,11 +272,18 @@ class Wildbook:
         comparison_scores = {}
         for comparison in response_json["response"]:
             score = comparison["score_list"] if comparison["score_list"] else 1
-            comparison_scores[comparison["qaid"]] = score
+            comparison_scores[self.get_annotation_name(comparison["qaid"])] = {
+                "score": score[0],
+                "image": self.get_annotation_image(comparison["qaid"]),
+            }
 
         # Sorting scores
         sorted_scores = dict(
-            sorted(comparison_scores.items(), key=lambda item: item[1], reverse=True)
+            sorted(
+                comparison_scores.items(),
+                key=lambda item: item[1]["score"],
+                reverse=True,
+            )
         )
 
         return sorted_scores

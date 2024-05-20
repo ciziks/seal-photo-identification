@@ -1,9 +1,20 @@
-from typing import Union
-from fastapi import FastAPI, Depends, File, UploadFile, Form
+from fastapi import FastAPI, Depends, File, UploadFile, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import sqlite3
 from .wrappers.Wildbook import Wildbook
 import os
+from sqlalchemy.orm import Session, joinedload
+from .database import SessionLocal, engine, Base
+from .models import Seal, Sighting, Encounter
+from .schemas import (
+    SealCreate,
+    Seal as SealSchema,
+    SightingCreate,
+    Sighting as SightingSchema,
+    EncounterCreate,
+    Encounter as EncounterSchema,
+)
+
+Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI()
@@ -16,169 +27,272 @@ app.add_middleware(
 )
 
 
+# Function to connect a session to the database
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 @app.get("/")
-def read_root(wildbook: Wildbook = Depends(Wildbook)):
+def root(wildbook: Wildbook = Depends(Wildbook), db: Session = Depends(get_db)):
     wildbook_running = wildbook.is_running()
 
-    connection = sqlite3.connect("sealcenter.db")
-    connection.row_factory = sqlite3.Row
-    cursor = connection.cursor()
-
-    cursor.execute("SELECT * FROM Seals LIMIT 1")
-    row = cursor.fetchone()
-    connection.close()
+    # Query to get the first seal entry
+    seal = db.query(Seal).first()
 
     return {
         "text": "Hello World",
         "wildbook": wildbook_running,
-        "db": dict(row) if row else "No data found",
+        "db": seal if seal else "No data found",
     }
 
 
-# Upload seal without detection
-@app.post("/seal/image")
-async def upload_seal(
-    image: UploadFile = File(...),
-    name: str = Form(...),
-    wildbook: Wildbook = Depends(Wildbook),
-):
-    if not image:  # Check for image
-        return "No Image uploaded"
-
-    # Save the file temporarily
-    temp_image_path = "path_to_temp_storage"
-    with open("path_to_temp_storage", "wb") as f:
-        f.write(await image.read())
-
-    # Upload image
-    image_id = int(wildbook.upload_image(temp_image_path))
-
-    # Clean up after upload
-    os.remove(temp_image_path)
-
-    # Get Image Size
-    image_size = [0, 0] + list(wildbook.get_images_size(image_id)[0])
-
-    # Detect the seal in the image
-    aid_list = wildbook.create_annotations([image_id], [image_size], [name])
-
-    return {"status": "success", "annotation_id": aid_list}
-
-
-# Create Seal (MVP)
-@app.post("/seal")
+# Create Seal
+@app.post("/seal", response_model=SealSchema)
 async def new_seal(
-    image: UploadFile = File(...), wildbook: Wildbook = Depends(Wildbook)
+    seal: SealCreate,
+    db: Session = Depends(get_db),
 ):
-    if not image:  # Check for image
-        return "No Image uploaded"
+    db_seal = db.query(Seal).filter(Seal.ID == seal.ID).first()
+    if db_seal:
+        raise HTTPException(status_code=400, detail="Seal already registered")
 
-    # Save the file temporarily
-    temp_image_path = "path_to_temp_storage"
-    with open("path_to_temp_storage", "wb") as f:
-        f.write(await image.read())
-
-    # Upload image
-    image_id = wildbook.upload_image(temp_image_path)
-
-    # Clean up after upload
-    os.remove(temp_image_path)
-
-    # Detect the seal in the image
-    aid_list = wildbook.detect_seal([int(image_id)])
-
-    # Match seal with seals in DB
-    score = wildbook.seal_matching(aid_list[0])
-
-    # Find aid and score for best match
-    try:
-        match_aid, match_score = next(iter(score.items()))
-    except StopIteration:
-        # Handle the case where there are no items
-        match_aid, match_score = None, None
-
-    # Get the uploaded image
-    initial_image = wildbook.get_annotation_image(aid_list[0])
-
-    # If there is a match, get the 'best match' image
-    if match_aid:
-        matched_image = wildbook.get_annotation_image(match_aid)
-        matched_name = wildbook.get_annotation_name(match_aid)
-
-        # Set the name of the seal
-        wildbook.rename_annotations(
-            aid_list, [matched_name]
-        )  # Rename the uploaded image with the match name
-
-        matched_image_base64 = matched_image.split(",", 1)[1]  # Remove the prefix
-    else:
-        # If there is no match, set a placeholder
-        matched_image_base64 = None
-
-    # Encode the initial as base64 for embedding in HTML
-    initial_image_base64 = initial_image.split(",", 1)[1]  # Remove the prefix
-
-    return {
-        "initial_image": initial_image_base64,
-        "matched_image": matched_image_base64,
-        "match_aid": match_aid,
-        "match_name": matched_name,
-        "match_score": match_score,
-        "initial_aid": aid_list[0],
-    }
+    new_seal = Seal(**seal.model_dump())
+    db.add(new_seal)
+    db.commit()
+    db.refresh(new_seal)
+    return new_seal
 
 
-# Read Single Seal
-@app.get("/seal/{seal_id}")
-def read_seal(seal_id: str, wildbook: Wildbook = Depends(Wildbook)): ...
+# Read Individual Seal
+@app.get("/seals/{seal_id}", response_model=SealSchema)
+def read_seal(
+    seal_id: str, wildbook: Wildbook = Depends(Wildbook), db: Session = Depends(get_db)
+):
+    seal = (
+        db.query(Seal)
+        .filter(Seal.ID == seal_id)
+        .options(joinedload(Seal.encounters))
+        .first()
+    )
+
+    if not seal:
+        raise HTTPException(status_code=404, detail="Seal not found")
+
+    seal_images = []
+
+    for encounter in seal.encounters:
+        annotation_image = wildbook.get_annotation_image(encounter.WildBookID)
+        seal_images.append(annotation_image)
+
+    return {**seal.__dict__, "images": seal_images}
 
 
-# List Seals
+# List Seals with their images
 @app.get("/seals")
-def list_seals(wildbook: Wildbook = Depends(Wildbook)):
-    # Get the list of aids
-    seal_aids = wildbook.list_annotations_id()
+def list_seals(wildbook: Wildbook = Depends(Wildbook), db: Session = Depends(get_db)):
+    seals = db.query(Seal).options(joinedload(Seal.encounters)).all()
+    seals_with_encounters = {}
 
-    # Get name and image for each Aid
-    seal_images = {}
-    for aid in seal_aids:
-        seal_name = wildbook.get_annotation_name(aid)
-        annotation_image = wildbook.get_annotation_image(aid)
+    for seal in seals:
+        seals_with_encounters[seal.ID] = []
 
-        if seal_images.get(seal_name, None):
-            seal_images[seal_name].append(annotation_image)
-        else:
-            seal_images[seal_name] = [annotation_image]
+        for encounter in seal.encounters:
+            annotation_image = wildbook.get_annotation_image(encounter.WildBookID)
+            seals_with_encounters[seal.ID].append(annotation_image)
 
-    # Return template with the data
-    return seal_images
+    return seals_with_encounters
 
 
 # Update Seals
-@app.put("/seal/{seal_id}")
-def update_seal(seal_id: str, wildbook: Wildbook = Depends(Wildbook)): ...
+@app.put("/seals/{seal_id}", response_model=SealSchema)
+def update_seal(seal_id: str, seal: SealCreate, db: Session = Depends(get_db)):
+    db_seal = db.query(Seal).filter(Seal.ID == seal_id).first()
+    if not db_seal:
+        raise HTTPException(status_code=404, detail="Seal not found")
+
+    seal_data = seal.model_dump()
+    for key, value in seal_data.items():
+        setattr(db_seal, key, value)
+
+    db.commit()
+    db.refresh(db_seal)
+    return db_seal
 
 
 # Delete Seal
-@app.delete("/seal/{seal_id}")
-def remove_seal(seal_id: str, wildbook: Wildbook = Depends(Wildbook)): ...
+@app.delete("/seals/{seal_id}", response_model=SealSchema)
+def delete_seal(seal_id: str, db: Session = Depends(get_db)):
+    db_seal = db.query(Seal).filter(Seal.ID == seal_id).first()
+    if not db_seal:
+        raise HTTPException(status_code=404, detail="Seal not found")
+
+    db.delete(db_seal)
+    db.commit()
+    return db_seal
 
 
 # Create Sighting
-@app.post("/sighting")
-def add_sighting(wildbook: Wildbook = Depends(Wildbook)): ...
+@app.post("/sightings", response_model=SightingSchema)
+def add_sighting(
+    sighting: SightingCreate,
+    db: Session = Depends(get_db),
+):
+    # Check if the sighting already exists
+    existing_sighting = (
+        db.query(Sighting)
+        .filter(Sighting.Date == sighting.Date, Sighting.Location == sighting.Location)
+        .first()
+    )
+
+    if existing_sighting:
+        new_sighting = existing_sighting
+    else:
+        # Create the Sighting Register
+        sighting_data = sighting.model_dump()
+        new_sighting = Sighting(**sighting_data)
+
+        db.add(new_sighting)
+        db.commit()
+        db.refresh(new_sighting)
+
+    return new_sighting
 
 
 # Read Sighting
-@app.get("/sighting/{sighting_id}")
-def get_sighting(sighting_id: str, wildbook: Wildbook = Depends(Wildbook)): ...
+@app.get("/sightings/{sighting_id}", response_model=SightingSchema)
+def read_sighting(
+    sighting_id: int,
+    db: Session = Depends(get_db),
+    wildbook: Wildbook = Depends(Wildbook),
+):
+    sighting = (
+        db.query(Sighting)
+        .filter(Sighting.SightingID == sighting_id)
+        .options(joinedload(Seal.encounters))
+        .first()
+    )
+
+    if not sighting:
+        raise HTTPException(status_code=404, detail="Sighting not found")
+
+    sighting_images = []
+
+    for encounter in sighting.encounters:
+        annotation_image = wildbook.get_annotation_image(encounter.WildBookID)
+        sighting_images.append(annotation_image)
+
+    return {**sighting, "images": sighting_images}
 
 
-# Update Sighting
-@app.put("/sighting/{sighting_id}")
-def edit_sighting(sighting_id: str, wildbook: Wildbook = Depends(Wildbook)): ...
+# List Sightings
+@app.get("/sightings", response_model=list[SightingSchema])
+def list_sightings(
+    wildbook: Wildbook = Depends(Wildbook), db: Session = Depends(get_db)
+):
+    sightings = db.query(Sighting).options(joinedload(Sighting.encounters)).all()
+
+    sightings_with_encounters = {}
+
+    for sighting in sightings:
+        sightings_with_encounters[sighting.ID] = []
+
+        for encounter in sighting.encounters:
+            annotation_image = wildbook.get_annotation_image(encounter.WildBookID)
+            sightings_with_encounters[sighting.ID].append(annotation_image)
+
+    return sightings_with_encounters
 
 
-# Delete Sighting
-@app.delete("/sighting/{sighting_id}")
-def remove_sighting(sighting_id: str, wildbook: Wildbook = Depends(Wildbook)): ...
+# Update Sightings
+@app.put("/sightings/{sighting_id}", response_model=SightingSchema)
+def update_sighting(
+    sighting_id: int, sighting: SightingCreate, db: Session = Depends(get_db)
+):
+    db_sighting = db.query(Sighting).filter(Sighting.SightingID == sighting_id).first()
+    if not db_sighting:
+        raise HTTPException(status_code=404, detail="Sighting not found")
+    sighting_data = sighting.model_dump()
+    for key, value in sighting_data.items():
+        setattr(db_sighting, key, value)
+    db.commit()
+    db.refresh(db_sighting)
+    return db_sighting
+
+
+# Remove Sightings
+@app.delete("/sightings/{sighting_id}", response_model=SightingSchema)
+def delete_sighting(sighting_id: int, db: Session = Depends(get_db)):
+    db_sighting = db.query(Sighting).filter(Sighting.SightingID == sighting_id).first()
+    if not db_sighting:
+        raise HTTPException(status_code=404, detail="Sighting not found")
+    db.delete(db_sighting)
+    db.commit()
+    return db_sighting
+
+
+@app.post("/detect")
+async def detect_seal(
+    image: UploadFile = File(...),
+    wildbook: Wildbook = Depends(Wildbook),
+):
+    if not image:  # Check for image
+        raise HTTPException(status_code=400, detail="No image uploaded")
+
+    # Save the image temporarily
+    temp_image_path = "temp_image_storage.png"
+    with open(temp_image_path, "wb") as f:
+        f.write(await image.read())
+
+    try:
+        # Upload image
+        image_id = wildbook.upload_image(temp_image_path)
+
+        # Get Image Size
+        image_size = [0, 0] + list(wildbook.get_images_size([image_id])[0])
+
+        # Create Annotation in WildBook
+        aid_list = wildbook.create_annotations(
+            [image_id],
+            [image_size],
+        )
+        print(aid_list)
+        # Match seal with seals in DB
+        scores = wildbook.seal_matching(aid_list[0])
+
+    finally:
+        # Clean up after upload
+        os.remove(temp_image_path)
+
+    return {"wildbook_id": aid_list[0], **scores}
+
+
+@app.post("/encounters", response_model=EncounterSchema)
+def create_encounter(encounter: EncounterCreate, db: Session = Depends(get_db)):
+    # Check if the specified sighting exists
+    existing_sighting = (
+        db.query(Sighting).filter(Sighting.SightingID == encounter.SightingID).first()
+    )
+    if not existing_sighting:
+        raise HTTPException(status_code=404, detail="Sighting not found")
+
+    # Check if the specified seal exists
+    existing_seal = db.query(Seal).filter(Seal.ID == encounter.SealID).first()
+    if not existing_seal:
+        raise HTTPException(status_code=404, detail="Seal not found")
+
+    # Create the Encounter
+    new_encounter = Encounter(
+        SightingID=encounter.SightingID,
+        SealID=encounter.SealID,
+        WildBookID=encounter.WildBookID,
+    )
+
+    db.add(new_encounter)
+    db.commit()
+    db.refresh(new_encounter)
+
+    return new_encounter
