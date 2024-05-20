@@ -4,7 +4,9 @@
       <router-link to="/">
         <img src="@/assets/images/logo_64x64.jpeg" alt="Logo" class="logo"/>
       </router-link>
-      <router-link to="/upload-seal" class="btn btn-primary">Upload seal</router-link>
+      <router-link to="/add-seal" class="btn btn-primary">Add Seal</router-link>
+      <router-link to="/delete-seal" class="btn btn-primary">Delete Seal</router-link>
+      <router-link to="/upload-seal" class="btn btn-primary">Upload Sighting</router-link>
       <router-link to="/detect-seal" class="btn btn-primary">Detect seal</router-link>
       <router-link to="/list-seals" class="btn btn-primary">List seals</router-link>
     </div>

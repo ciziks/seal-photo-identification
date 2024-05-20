@@ -1,8 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import AddSealView from '../views/UploadSealView.vue';
+import UploadSealView from '../views/UploadSealView.vue';
 import DetectSealView from '../views/DetectSealView';
 import ListSealsView from '../views/ListSealsView';
+import AddSealView from '../views/AddSealView.vue';
+import DeleteSealView from '../views/DeleteSealView.vue'
 
 const routes = [
   {
@@ -21,7 +23,7 @@ const routes = [
   {
     path: '/upload-seal',
     name: 'upload-seal',
-    component: AddSealView
+    component: UploadSealView
   },
   {
     path: '/detect-seal',
@@ -32,6 +34,16 @@ const routes = [
     path: '/list-seals',
     name: 'list-seals',
     component: ListSealsView
+  },
+  {
+    path: '/add-seal',
+    name: 'add-seal',
+    component: AddSealView
+  },
+  {
+    path: '/delete-seal',
+    name: 'delete-seal',
+    component: DeleteSealView
   }
 ]
 
