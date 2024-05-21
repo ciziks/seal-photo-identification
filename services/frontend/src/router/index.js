@@ -6,6 +6,7 @@ import ListSealsView from '../views/ListSealsView';
 import AddSealView from '../views/AddSealView.vue';
 import DeleteSealView from '../views/DeleteSealView.vue';
 import AddSightingView from '../views/AddSightingView.vue';
+import DeleteSightingView from '../views/DeleteSightingView.vue';
 
 const routes = [
   {
@@ -50,6 +51,11 @@ const routes = [
     path: '/add-sighting',
     name: 'add-sighting',
     component: AddSightingView
+  },
+  {
+    path: '/delete-sighting',
+    name: 'delete-sighting',
+    component: DeleteSightingView
   }
 ]
 
