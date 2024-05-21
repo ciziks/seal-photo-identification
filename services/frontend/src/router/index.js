@@ -4,7 +4,8 @@ import UploadSealView from '../views/UploadSealView.vue';
 import DetectSealView from '../views/DetectSealView';
 import ListSealsView from '../views/ListSealsView';
 import AddSealView from '../views/AddSealView.vue';
-import DeleteSealView from '../views/DeleteSealView.vue'
+import DeleteSealView from '../views/DeleteSealView.vue';
+import AddSightingView from '../views/AddSightingView.vue';
 
 const routes = [
   {
@@ -44,6 +45,11 @@ const routes = [
     path: '/delete-seal',
     name: 'delete-seal',
     component: DeleteSealView
+  },
+  {
+    path: '/add-sighting',
+    name: 'add-sighting',
+    component: AddSightingView
   }
 ]
 
