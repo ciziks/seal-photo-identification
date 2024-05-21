@@ -1,7 +1,7 @@
 <template>
     <div class="add-sighting-view">
       <h1>Add Sighting</h1>
-      <form>
+      <form @submit.prevent="addSighting">
         <div>
           <label for="date">Date:</label>
           <input type="date" v-model="date" id="date" required />
@@ -53,12 +53,20 @@
           <img :src="image" :alt="'Cropped Image ' + index" />
         </div>
       </div>
+  
+      <div v-if="error" class="error-message">
+        {{ error }}
+      </div>
+      <div v-if="success" class="success-message">
+        Sighting added successfully!
+      </div>
     </div>
   </template>
   
   <script>
   import VueCropper from 'vue-cropperjs';
   import 'cropperjs/dist/cropper.css';
+  import axios from 'axios';
   
   export default {
     components: {
@@ -73,7 +81,10 @@
         currentImageSrc: null,
         isCropping: false,
         isCropped: false,
-        currentIndex: 0
+        currentIndex: 0,
+        sightingId: null,
+        error: null,
+        success: false
       };
     },
     methods: {
@@ -122,9 +133,36 @@
           });
         }
       },
-      addSighting() {
-        // Placeholder for the add sighting functionality to be implemented later
-        alert(`Sighting added! Date: ${this.date}, Location: ${this.location}`);
+      async addSighting() {
+        try {
+          this.error = null;
+          this.success = false;
+  
+          const dateParts = this.date.split('-');
+          const formattedDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+          const sightingData = {
+            Date: formattedDate,
+            Location: this.location
+          };
+          
+          console.log('Sending sighting data:', sightingData);
+          const response = await axios.post('/sightings', sightingData);
+          this.sightingId = response.data.SightingID;
+          console.log('Sighting added:', response.data);
+          
+          this.success = true;
+          // Optionally reset form fields after success
+          this.date = '';
+          this.location = 'field';
+          this.files = [];
+          this.croppedImages = [];
+          this.currentImageSrc = null;
+          this.isCropping = false;
+          this.isCropped = false;
+          this.currentIndex = 0;
+        } catch (error) {
+          this.error = error.response?.data?.detail || error.message;
+        }
       }
     }
   };
@@ -153,6 +191,16 @@
     max-height: 150px;
     object-fit: contain;
     border: 1px solid #ccc;
+  }
+  
+  .error-message {
+    color: red;
+    margin-top: 20px;
+  }
+  
+  .success-message {
+    color: green;
+    margin-top: 20px;
   }
   </style>
   
