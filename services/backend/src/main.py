@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import FastAPI, Depends, File, UploadFile, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from .wrappers.Wildbook import Wildbook
@@ -184,7 +185,7 @@ def read_sighting(
     sighting = (
         db.query(Sighting)
         .filter(Sighting.SightingID == sighting_id)
-        .options(joinedload(Seal.encounters))
+        .options(joinedload(Sighting.encounters))
         .first()
     )
 
@@ -197,26 +198,42 @@ def read_sighting(
         annotation_image = wildbook.get_annotation_image(encounter.WildBookID)
         sighting_images.append(annotation_image)
 
-    return {**sighting, "images": sighting_images}
+    return {
+        **sighting.__dict__,
+        "images": sighting_images,
+    }
 
 
-# List Sightings
-@app.get("/sightings", response_model=list[SightingSchema])
+# List Sightings with Pagination
+@app.get("/sightings")
 def list_sightings(
-    wildbook: Wildbook = Depends(Wildbook), db: Session = Depends(get_db)
+    wildbook: Wildbook = Depends(Wildbook),
+    db: Session = Depends(get_db),
+    limit: int = Query(10, description="# of maximum results", gt=0),
+    offset: int = Query(0, description="# of results to skip", ge=0),
 ):
-    sightings = db.query(Sighting).options(joinedload(Sighting.encounters)).all()
+    sightings_query = db.query(Sighting).options(joinedload(Sighting.encounters))
+    total_sightings = sightings_query.count()
+    sightings = sightings_query.offset(offset).limit(limit).all()
 
-    sightings_with_encounters = {}
+    response_data = []
 
     for sighting in sightings:
-        sightings_with_encounters[sighting.ID] = []
-
+        sighting_images = []
         for encounter in sighting.encounters:
             annotation_image = wildbook.get_annotation_image(encounter.WildBookID)
-            sightings_with_encounters[sighting.ID].append(annotation_image)
+            sighting_images.append(annotation_image)
 
-    return sightings_with_encounters
+        sighting_dict = sighting.__dict__
+        sighting_dict["images"] = sighting_images
+        response_data.append(sighting_dict)
+
+    return {
+        "total": total_sightings,
+        "limit": limit,
+        "offset": offset,
+        "data": response_data,
+    }
 
 
 # Update Sightings

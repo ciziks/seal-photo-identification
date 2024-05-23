@@ -52,7 +52,7 @@ class SightingBase(BaseModel):
 
 
 class SightingCreate(SightingBase):
-    @validator('Date', pre=True)
+    @validator("Date", pre=True)
     def parse_date(cls, value):
         return datetime.strptime(value, "%d/%m/%Y")
 
@@ -60,6 +60,7 @@ class SightingCreate(SightingBase):
 class Sighting(SightingBase):
     SightingID: int
     encounters: List[EncounterSchema] = []
+    images: List[str] = []
 
     class Config:
         orm_mode = True
