@@ -1,30 +1,38 @@
 <template>
   <div class="list-sighting-view">
     <h1>List Sighting</h1>
-    <form @submit.prevent="fetchSighting">
-      <div>
-        <label for="sightingId">Sighting ID:</label>
-        <input type="number" v-model="sightingId" id="sightingId" required />
+    <div class="input-container">
+      <input v-model="sightingId" placeholder="Enter Sighting ID" />
+      <button @click="fetchSighting">Get Sighting</button>
+    </div>
+    <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+    <div v-if="sighting">
+      <h2>Sighting Information</h2>
+      <p>Date: {{ sighting.Date }}</p>
+      <p>Location: {{ sighting.Location }}</p>
+      <div v-for="(encounter, index) in sighting.encounters" :key="index" class="seal">
+        <div class="seal-header">
+          <h2 @click="fetchSeal(encounter.SealID)">{{ encounter.SealID }}</h2>
+          <button v-if="sighting.images.length > 3" @click="nextImages(index)" class="next-button">
+            <img src="@/assets/images/right_arrow.png" />
+          </button>
+        </div>
+        <div class="seal-images">
+          <img v-for="(image, imgIndex) in getCurrentImages(index)" :key="imgIndex" :src="image" :alt="`Image of ${encounter.SealID}`" />
+        </div>
       </div>
-      <button type="submit">Get Sighting</button>
-    </form>
-
-    <div v-if="error" class="error-message">
-      {{ error }}
     </div>
 
-    <div v-if="sighting" class="sighting-details">
-      <h2>Sighting Details</h2>
-      <p><strong>ID:</strong> {{ sighting.SightingID }}</p>
-      <p><strong>Date:</strong> {{ sighting.Date }}</p>
-      <p><strong>Location:</strong> {{ sighting.Location }}</p>
-
-      <div class="sighting-images">
-        <img v-for="(image, index) in getCurrentImages()" :key="index" :src="image" alt="Sighting Image" />
+    <div v-if="seal">
+      <h2>Seal Information</h2>
+      <p>ID: {{ seal.ID }}</p>
+      <p>Age: {{ seal.age }}</p>
+      <p>Gender: {{ seal.gender }}</p>
+      <p v-if="seal.comments">Comments: {{ seal.comments }}</p>
+      <p v-if="seal.isPregnant">Pregnant: {{ seal.isPregnant }}</p>
+      <div class="seal-images">
+        <img v-for="(image, index) in seal.images" :key="index" :src="image" alt="Seal Image" />
       </div>
-      <button v-if="sighting.images.length > 3" @click="nextImages" class="next-button">
-        <img src="../assets/images/right_arrow.png" />
-      </button>
     </div>
   </div>
 </template>
@@ -35,60 +43,115 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      sightingId: null,
+      sightingId: '',
       sighting: null,
-      error: null,
-      imageIndex: 0 // Track current index for sighting images
+      seal: null,
+      imageIndices: {}, // Track current index for each encounter
+      errorMessage: '',
     };
   },
   methods: {
     async fetchSighting() {
       try {
-        this.error = null;
-        this.sighting = null;
-        this.imageIndex = 0;
-
         const response = await axios.get(`http://localhost:5001/sightings/${this.sightingId}`);
         this.sighting = response.data;
+        this.imageIndices = this.sighting.encounters.reduce((acc, _, index) => {
+          acc[index] = 0;
+          return acc;
+        }, {});
+        this.errorMessage = ''; // Clear error message if successful
       } catch (error) {
-        this.error = error.response?.data?.detail || error.message;
+        this.errorMessage = 'Sighting not found';
       }
     },
-    getCurrentImages() {
-      if (!this.sighting || !this.sighting.images) return [];
-      return this.sighting.images.slice(this.imageIndex, this.imageIndex + 3);
+    getCurrentImages(index) {
+      const images = this.sighting.images;
+      return images.slice(this.imageIndices[index], this.imageIndices[index] + 3);
     },
-    nextImages() {
-      this.imageIndex += 3;
-      if (this.imageIndex >= this.sighting.images.length) {
-        this.imageIndex = 0; // Reset to the first three images if we reach the end
+    nextImages(index) {
+      let nextIndex = this.imageIndices[index] + 3;
+      if (nextIndex >= this.sighting.images.length) {
+        nextIndex = 0;  // Reset to the first three images if we reach the end
+      }
+      this.imageIndices[index] = nextIndex;
+    },
+    async fetchSeal(sealId) {
+      try {
+        const response = await axios.get(`http://localhost:5001/seals/${sealId}`);
+        this.seal = response.data;
+      } catch (error) {
+        alert('Seal not found');
       }
     }
-  }
+  },
 };
 </script>
 
-<style scoped>
+<style>
 .list-sighting-view {
-  max-width: 600px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
   padding: 20px;
+  box-sizing: border-box; /* Ensure padding is included in element's total width and height */
 }
 
-form {
+h1 {
   margin-bottom: 20px;
+  font-size: 2em;
+  color: #333;
+}
+
+.input-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+input {
+  padding: 10px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1em;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
 }
 
 .error-message {
   color: red;
-  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
-.sighting-details {
-  margin-top: 20px;
+.seal {
+  width: 100%; /* Full width of the container to use maximum space */
+  border: 1px solid #ccc;
+  margin: 20px 0; /* Vertical margin for separation */
+  padding: 20px;
+  box-sizing: border-box; /* Padding and border included in width calculation */
 }
 
-.sighting-images {
+.seal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  cursor: pointer;
+}
+
+.seal-images {
   display: flex;
   align-items: center;
   overflow-x: auto; /* Enables horizontal scrolling */
@@ -97,7 +160,7 @@ form {
   padding-right: 20px; /* Right padding to ensure no image is cut off */
 }
 
-.sighting-images img {
+.seal-images img {
   height: 150px; /* Fixed height for all images */
   width: auto; /* Width auto to maintain aspect ratio */
   flex: 0 0 auto; /* Do not grow or shrink, use image's native size */
@@ -113,7 +176,7 @@ form {
 }
 
 .next-button img {
-  width: 125px; /* Adjust size as necessary */
-  height: 125px;
+  width: 50px; /* Adjust size as necessary */
+  height: 50px;
 }
 </style>
