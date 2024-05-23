@@ -1,12 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import UploadSealView from '../views/UploadSealView.vue';
-import DetectSealView from '../views/DetectSealView';
 import ListSealsView from '../views/ListSealsView';
 import AddSealView from '../views/AddSealView.vue';
 import DeleteSealView from '../views/DeleteSealView.vue';
 import AddSightingView from '../views/AddSightingView.vue';
 import DeleteSightingView from '../views/DeleteSightingView.vue';
+import ListSightingView from '../views/ListSightingView.vue';
 
 const routes = [
   {
@@ -21,16 +20,6 @@ const routes = [
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  },
-  {
-    path: '/upload-seal',
-    name: 'upload-seal',
-    component: UploadSealView
-  },
-  {
-    path: '/detect-seal',
-    name: 'detect-seal',
-    component: DetectSealView
   },
   {
     path: '/list-seals',
@@ -56,6 +45,11 @@ const routes = [
     path: '/delete-sighting',
     name: 'delete-sighting',
     component: DeleteSightingView
+  },
+  {
+    path: '/list-sighting',
+    name: 'list-sighting',
+    component: ListSightingView
   }
 ]
 

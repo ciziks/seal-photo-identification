@@ -6,9 +6,10 @@
       </router-link>
       <router-link to="/add-seal" class="btn btn-primary">Add Seal</router-link>
       <router-link to="/delete-seal" class="btn btn-primary">Delete Seal</router-link>
+      <router-link to="/list-seals" class="btn btn-primary">List seals</router-link>
       <router-link to="/add-sighting" class="btn btn-primary">Add Sighting</router-link>
       <router-link to="/delete-sighting" class="btn btn-primary">Delete Sighting</router-link>
-      <router-link to="/list-seals" class="btn btn-primary">List seals</router-link>
+      <router-link to="/list-sighting" class="btn btn-primary">List sighting</router-link>
     </div>
     <div class="content">
       <router-view/>
