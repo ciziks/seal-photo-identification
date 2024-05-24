@@ -24,4 +24,4 @@ services:
     ports:
       - 84:5000
     volumes:
-      - /Users/mateiteodoru/Desktop/WIldbook:/data/db/
+      - ./wildbookDB:/data/db/
