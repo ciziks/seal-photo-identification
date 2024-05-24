@@ -3,6 +3,7 @@ from fastapi import FastAPI, Depends, File, UploadFile, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from .wrappers.Wildbook import Wildbook
 import os
+from datetime import datetime
 from sqlalchemy.orm import Session, joinedload
 from .database import SessionLocal, engine, Base
 from .models import Seal, Sighting, Encounter
@@ -69,7 +70,7 @@ async def new_seal(
 
 
 # Read Individual Seal
-@app.get("/seals/{seal_id}", response_model=SealSchema)
+@app.get("/seals/{seal_id}")
 def read_seal(
     seal_id: str, wildbook: Wildbook = Depends(Wildbook), db: Session = Depends(get_db)
 ):
@@ -92,7 +93,7 @@ def read_seal(
     return {**seal.__dict__, "images": seal_images}
 
 
-# List Seals with their images with pagination
+# List Seals with their latest image with pagination
 @app.get("/seals")
 def list_seals(
     wildbook: Wildbook = Depends(Wildbook),
@@ -103,20 +104,22 @@ def list_seals(
     seals_query = db.query(Seal).options(joinedload(Seal.encounters))
     total_seals = seals_query.count()
     seals = seals_query.offset(offset).limit(limit).all()
-    seals_with_encounters = {}
+    seals_with_encounter = {}
 
     for seal in seals:
-        seals_with_encounters[seal.ID] = []
+        seals_with_encounter[seal.ID] = []
 
-        for encounter in seal.encounters:
-            annotation_image = wildbook.get_annotation_image(encounter.WildBookID)
-            seals_with_encounters[seal.ID].append(annotation_image)
+        if seal.encounters:
+            annotation_image = wildbook.get_annotation_image(
+                seal.encounters[0].WildBookID
+            )
+            seals_with_encounter[seal.ID].append(annotation_image)
 
     return {
         "total": total_seals,
         "limit": limit,
         "offset": offset,
-        "data": seals_with_encounters,
+        "data": seals_with_encounter,
     }
 
 

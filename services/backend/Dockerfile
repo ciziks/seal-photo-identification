@@ -10,9 +10,4 @@ COPY requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-COPY src/ .
 COPY seal_schema.sql .
-
-RUN apt update && apt install -y sqlite3
-
-RUN sqlite3 sealcenter.db < seal_schema.sql
