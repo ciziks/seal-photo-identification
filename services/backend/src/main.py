@@ -337,9 +337,8 @@ async def detect_seal(
             [image_id],
             [image_size],
         )
-        print(aid_list)
         # Match seal with seals in DB
-        scores = wildbook.seal_matching(aid_list[0])
+        scores = wildbook.seal_matching(aid_list[0])[:5]
 
     finally:
         # Clean up after upload
