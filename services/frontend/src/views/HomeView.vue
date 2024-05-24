@@ -9,7 +9,7 @@
     <section class="features">
       <div class="feature">
         <h2>Visualize Data</h2>
-        <p>View and analyze data through a user-friendly interface.</p>
+        <p>Analyze data through a user-friendly interface.</p>
       </div>
       <div class="feature">
         <h2>Add New Sightings</h2>
