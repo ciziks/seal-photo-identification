@@ -1,10 +1,11 @@
-from typing import List
+from typing import List, Optional
 from fastapi import FastAPI, Depends, File, UploadFile, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from .wrappers.Wildbook import Wildbook
 import os
 from datetime import datetime
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import func
 from .database import SessionLocal, engine, Base
 from .models import Seal, Sighting, Encounter
 from .schemas import (
@@ -206,6 +207,51 @@ def read_sighting(
         "images": sighting_images,
     }
 
+# Read Sighting from Date & Location
+@app.get("/sightings/search/")
+def filter_sightings(
+    date: Optional[str] = Query(None, description="Date in 'dd-mm-yyyy' format"),
+    location: Optional[str] = Query(None, description="Location of the sighting"),
+    wildbook: Wildbook = Depends(Wildbook),
+    db: Session = Depends(get_db),
+):
+    
+    # Convert date string to datetime object if provided
+    if date:
+        try:
+            parsed_date = datetime.strptime(date, "%d-%m-%Y")
+            print(f"Parsed date: {parsed_date}")
+        except ValueError:
+            raise HTTPException(
+                status_code=400, detail="Invalid date format. Use 'dd-mm-yyyy'."
+            )
+    else:
+        parsed_date = None
+
+    # Build the query dynamically
+    query = db.query(Sighting).options(joinedload(Sighting.encounters))
+    if parsed_date:
+        query = query.filter(func.date(Sighting.Date) == parsed_date.date())
+    if location:
+        query = query.filter(Sighting.Location == location)
+
+    sightings = query.all()
+
+    if not sightings:
+        raise HTTPException(status_code=404, detail="No sightings found")
+
+    sightings_data = []
+    for sighting in sightings:
+        sighting_images = []
+        for encounter in sighting.encounters:
+            annotation_image = wildbook.get_annotation_image(encounter.WildBookID)
+            sighting_images.append(annotation_image)
+        
+        sighting_dict = sighting.__dict__
+        sighting_dict["images"] = sighting_images
+        sightings_data.append(sighting_dict)
+
+    return sightings_data
 
 # List Sightings with Pagination
 @app.get("/sightings")
