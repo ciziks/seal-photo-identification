@@ -10,10 +10,10 @@
       <h2>Sighting Information</h2>
       <p>Date: {{ sighting.Date }}</p>
       <p>Location: {{ sighting.Location }}</p>
-      <div v-for="(encounter, index) in sighting.encounters" :key="index" class="seal">
+      <div v-for="(encounter, index) in uniqueEncounters" :key="index" class="seal">
         <div class="seal-header">
           <h2 @click="fetchSeal(encounter.SealID)">{{ encounter.SealID }}</h2>
-          <button v-if="sighting.images.length > 3" @click="nextImages(index)" class="next-button">
+          <button v-if="getEncounterImages(index).length > 3" @click="nextImages(index)" class="next-button">
             <img src="@/assets/images/right_arrow.png" />
           </button>
         </div>
@@ -48,6 +48,7 @@ export default {
       seal: null,
       imageIndices: {}, // Track current index for each encounter
       errorMessage: '',
+      uniqueEncounters: [],
     };
   },
   methods: {
@@ -55,23 +56,42 @@ export default {
       try {
         const response = await axios.get(`http://localhost:5001/sightings/${this.sightingId}`);
         this.sighting = response.data;
-        this.imageIndices = this.sighting.encounters.reduce((acc, _, index) => {
-          acc[index] = 0;
-          return acc;
-        }, {});
+        this.imageIndices = {}; // Reset image indices
+
+        // Filter out duplicate encounters based on SealID
+        const encounteredSeals = new Set();
+        this.uniqueEncounters = this.sighting.encounters.filter(encounter => {
+          if (!encounteredSeals.has(encounter.SealID)) {
+            encounteredSeals.add(encounter.SealID);
+            return true;
+          }
+          return false;
+        });
+
+        // Initialize imageIndices for each unique encounter
+        this.uniqueEncounters.forEach((_, index) => {
+          this.imageIndices[index] = 0;
+        });
+
         this.errorMessage = ''; // Clear error message if successful
       } catch (error) {
         this.errorMessage = 'Sighting not found';
       }
     },
-    getCurrentImages(index) {
+    getEncounterImages(index) {
+      const encounter = this.uniqueEncounters[index];
       const images = this.sighting.images;
+      return images.filter((image, imgIndex) => this.sighting.encounters[imgIndex].SealID === encounter.SealID);
+    },
+    getCurrentImages(index) {
+      const images = this.getEncounterImages(index);
       return images.slice(this.imageIndices[index], this.imageIndices[index] + 3);
     },
     nextImages(index) {
+      const images = this.getEncounterImages(index);
       let nextIndex = this.imageIndices[index] + 3;
-      if (nextIndex >= this.sighting.images.length) {
-        nextIndex = 0;  // Reset to the first three images if we reach the end
+      if (nextIndex >= images.length) {
+        nextIndex = 0; // Reset to the first three images if we reach the end
       }
       this.imageIndices[index] = nextIndex;
     },
@@ -82,7 +102,7 @@ export default {
       } catch (error) {
         alert('Seal not found');
       }
-    }
+    },
   },
 };
 </script>
