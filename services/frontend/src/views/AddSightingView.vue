@@ -1,61 +1,74 @@
 <template>
   <div class="add-sighting-view">
     <h1>Add Sighting</h1>
-    <form @submit.prevent="addSighting">
-      <div>
-        <label for="date">Date:</label>
-        <input type="date" v-model="date" id="date" required />
-      </div>
-      <div>
-        <label for="location">Location:</label>
-        <select v-model="location" id="location" required>
-          <option value="field">Field</option>
-          <option value="centre">Centre</option>
-        </select>
-      </div>
-      <div
-        class="drop-area"
-        @dragover.prevent
-        @drop="handleDrop"
-        @click="triggerFileInput"
-        style="border: 2px dashed #0077be; padding: 20px; text-align: center; margin-top: 20px;"
-      >
-        Drop files here or click to upload
-      </div>
-      <input type="file" @change="handleFileChange" ref="fileInput" style="display: none;" multiple />
-    </form>
+    <div v-if="!showCroppedImages">
+      <form @submit.prevent="prepareCroppedImagesStep">
+        <div>
+          <label for="date">Date:</label>
+          <input type="date" v-model="date" id="date" required />
+        </div>
+        <div>
+          <label for="location">Location:</label>
+          <select v-model="location" id="location" required>
+            <option value="field">Field</option>
+            <option value="centre">Centre</option>
+          </select>
+        </div>
+        <div
+          class="drop-area"
+          @dragover.prevent
+          @drop="handleDrop"
+          @click="triggerFileInput"
+          style="border: 2px dashed #0077be; padding: 20px; text-align: center; margin-top: 20px;"
+        >
+          Drop files here or click to upload
+        </div>
+        <input type="file" @change="handleFileChange" ref="fileInput" style="display: none;" multiple />
+      </form>
 
-    <div v-if="files.length" style="margin-top: 20px;">
-      <h2>Selected Images</h2>
-      <ul>
-        <li v-for="(file, index) in files" :key="index">{{ file.name }}</li>
-      </ul>
-    </div>
+      <div v-if="files.length" style="margin-top: 20px;">
+        <h2>Selected Images</h2>
+        <ul>
+          <li v-for="(file, index) in files" :key="index">{{ file.name }}</li>
+        </ul>
+      </div>
 
-    <div v-if="currentImageSrc" style="margin-top: 20px;">
-      <h2>Crop Image</h2>
-      <vue-cropper
-        ref="cropper"
-        :src="currentImageSrc"
-        alt="Source Image"
-        :view-mode="1"
-        :guides="true"
-        :aspect-ratio="NaN"
-        style="margin-top: 20px;"
-      />
-      <button @click="getCroppedImage" :disabled="isCropping">Crop Image</button>
-      <button v-if="currentIndex < files.length - 1" @click="nextImage" :disabled="!isCropped">Next Image</button>
-      <button v-else @click="addSighting" :disabled="!isCropped">Add Sighting</button>
-    </div>
+      <div v-if="currentImageSrc" style="margin-top: 20px;">
+        <h2>Crop Image</h2>
+        <vue-cropper
+          ref="cropper"
+          :src="currentImageSrc"
+          alt="Source Image"
+          :view-mode="1"
+          :guides="true"
+          :aspect-ratio="NaN"
+          style="margin-top: 20px;"
+        />
+        <button @click="getCroppedImage" :disabled="isCropping">Crop Image</button>
+        <button v-if="currentIndex < files.length - 1" @click="nextImage" :disabled="!isCropped">Next Image</button>
+        <button v-else @click="prepareCroppedImagesStep" :disabled="!isCropped">Add Sighting</button>
+      </div>
 
-    <div v-if="croppedImages.length" style="margin-top: 20px;">
-      <h2>Cropped Images</h2>
-      <div v-for="(imageGroup, index) in croppedImages" :key="index">
-        <h3>Images from file {{ index + 1 }}</h3>
-        <div class="cropped-images-container">
-          <div v-for="(image, imgIndex) in imageGroup" :key="imgIndex" class="preview">
-            <img :src="image" :alt="'Cropped Image ' + imgIndex" />
+      <div v-if="croppedImages.length" style="margin-top: 20px;">
+        <h2>Cropped Images</h2>
+        <div v-for="(imageGroup, index) in croppedImages" :key="index">
+          <h3>Images from file {{ index + 1 }}</h3>
+          <div class="cropped-images-container">
+            <div v-for="(image, imgIndex) in imageGroup" :key="imgIndex" class="preview">
+              <img :src="image" :alt="'Cropped Image ' + imgIndex" />
+            </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-else class="cropped-images-step">
+      <h2>Process Cropped Images</h2>
+      <div v-if="croppedImages[currentCroppedImageIndex]">
+        <img class="cropped-image" :src="croppedImages[currentCroppedImageIndex][currentSubImageIndex]" alt="Cropped Image" />
+        <div class="buttons">
+          <button @click="detectImage">Detect</button>
+          <button @click="skipImage">Skip</button>
         </div>
       </div>
     </div>
@@ -91,6 +104,9 @@ export default {
       sightingId: null,
       error: null,
       success: false,
+      showCroppedImages: false,
+      currentCroppedImageIndex: 0,
+      currentSubImageIndex: 0,
     };
   },
   methods: {
@@ -139,7 +155,7 @@ export default {
         });
       }
     },
-    async addSighting() {
+    async prepareCroppedImagesStep() {
       try {
         this.error = null;
         this.success = false;
@@ -152,22 +168,34 @@ export default {
         };
 
         console.log('Sending sighting data:', sightingData);
-        const response = await axios.post('/sightings', sightingData);
+        const response = await axios.post('http://localhost:5001/sightings', sightingData);
         this.sightingId = response.data.SightingID;
         console.log('Sighting added:', response.data);
 
-        this.success = true;
-        // Optionally reset form fields after success
-        this.date = '';
-        this.location = 'field';
-        this.files = [];
-        this.croppedImages = [];
-        this.currentImageSrc = null;
-        this.isCropping = false;
-        this.isCropped = false;
-        this.currentIndex = 0;
+        this.showCroppedImagesStep();
       } catch (error) {
         this.error = error.response?.data?.detail || error.message;
+      }
+    },
+    showCroppedImagesStep() {
+      this.showCroppedImages = true;
+    },
+    detectImage() {
+      // Placeholder for detect image logic
+      this.nextCroppedImage();
+    },
+    skipImage() {
+      // Placeholder for skip image logic
+      this.nextCroppedImage();
+    },
+    nextCroppedImage() {
+      if (this.currentSubImageIndex < this.croppedImages[this.currentCroppedImageIndex].length - 1) {
+        this.currentSubImageIndex++;
+      } else if (this.currentCroppedImageIndex < this.croppedImages.length - 1) {
+        this.currentCroppedImageIndex++;
+        this.currentSubImageIndex = 0;
+      } else {
+        this.success = true; // All images processed
       }
     },
   },
@@ -204,6 +232,38 @@ export default {
   max-height: 150px;
   object-fit: contain;
   border: 1px solid #ccc;
+}
+
+.cropped-images-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cropped-image {
+  width: 300px;
+  height: 300px;
+  object-fit: contain;
+  border: 1px solid #ccc;
+  margin-bottom: 20px;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.buttons button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.buttons button:hover {
+  background-color: #0056b3;
 }
 
 .error-message {
