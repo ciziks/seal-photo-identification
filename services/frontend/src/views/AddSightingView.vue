@@ -70,6 +70,14 @@
           <button @click="detectImage">Detect</button>
           <button @click="skipImage">Skip</button>
         </div>
+        <div v-if="detectionResults.length" class="detection-results">
+          <h3>Detection Results</h3>
+          <div v-for="(result, index) in detectionResults" :key="index" class="result">
+            <p>Seal ID: {{ result.id }}</p>
+            <p>Score: {{ result.score }}</p>
+            <img :src="result.image" :alt="'Detected Image ' + index" class="detected-image"/>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -107,6 +115,7 @@ export default {
       showCroppedImages: false,
       currentCroppedImageIndex: 0,
       currentSubImageIndex: 0,
+      detectionResults: [], // Array to hold detection results
     };
   },
   methods: {
@@ -180,12 +189,37 @@ export default {
     showCroppedImagesStep() {
       this.showCroppedImages = true;
     },
-    detectImage() {
-      // Placeholder for detect image logic
-      this.nextCroppedImage();
+    async detectImage() {
+      try {
+        this.error = null;
+        this.success = false;
+
+        const croppedImageUrl = this.croppedImages[this.currentCroppedImageIndex][this.currentSubImageIndex];
+        const response = await fetch(croppedImageUrl);
+        const blob = await response.blob();
+        const formData = new FormData();
+        formData.append('image', blob, 'cropped_image.png');
+
+        const detectResponse = await axios.post('http://localhost:5001/detect', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        const scores = detectResponse.data;
+        this.detectionResults = Object.keys(scores).slice(1).map(key => ({
+          id: key,
+          score: scores[key].score,
+          image: scores[key].image,
+        }));
+
+        console.log('Detection results:', this.detectionResults);
+
+      } catch (error) {
+        this.error = error.response?.data?.detail || error.message;
+      }
     },
     skipImage() {
-      // Placeholder for skip image logic
       this.nextCroppedImage();
     },
     nextCroppedImage() {
@@ -197,6 +231,7 @@ export default {
       } else {
         this.success = true; // All images processed
       }
+      this.detectionResults = []; // Clear previous detection results
     },
   },
 };
@@ -264,6 +299,23 @@ export default {
 
 .buttons button:hover {
   background-color: #0056b3;
+}
+
+.detection-results {
+  margin-top: 20px;
+}
+
+.result {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.detected-image {
+  max-width: 100px;
+  max-height: 100px;
+  margin-top: 10px;
 }
 
 .error-message {
