@@ -141,6 +141,37 @@ class Wildbook:
 
         return response_json.get("response", None)
 
+    # Method to list names
+    def list_names_id(self):
+        endpoint = f"{self.base_url}/api/name/"
+
+        response = requests.get(endpoint)
+        response_json = response.json()
+
+        status = response_json.get("status")
+        if not status.get("success", None):
+            return Exception(status.get("message"))
+
+        return response_json.get("response", None)
+
+    # Method to list Annotations for each Name
+    def list_annotation_from_names(self, names_list: List[str]):
+        endpoint = f"{self.base_url}/api/name/annot/rowid/"
+
+        response = requests.get(endpoint, json={"nid_list": names_list})
+        response_json = response.json()
+
+        status = response_json.get("status")
+        if not status.get("success", None):
+            return Exception(status.get("message"))
+
+        annotations_id = []
+        for name in response_json.get("response", None):
+            if name:
+                annotations_id.append(str(name[0]))
+
+        return annotations_id
+
     # Method to list Annotation ID
     def list_annotations_id(self):
         endpoint = f"{self.base_url}/api/annot/json/"
@@ -255,12 +286,10 @@ class Wildbook:
         return
 
     # Method to perform seal matching with all annotations
-    def seal_matching(self, annotation_id: str) -> dict:
+    def seal_matching(self, annotation_id: str, comparison_list: List[str]) -> dict:
         endpoint = f"{self.base_url}/api/query/chip/dict/simple"
 
-        all_annotations_id = self.list_annotations_id()
-        all_annotations_id.remove(annotation_id)
-        payload = {"qaid_list": all_annotations_id, "daid_list": [annotation_id]}
+        payload = {"qaid_list": comparison_list, "daid_list": [annotation_id]}
 
         response = requests.get(endpoint, json=payload)
         response_json = response.json()
@@ -283,7 +312,7 @@ class Wildbook:
                 comparison_scores.items(),
                 key=lambda item: item[1]["score"],
                 reverse=True,
-            )
+            )[:5]
         )
 
         return sorted_scores

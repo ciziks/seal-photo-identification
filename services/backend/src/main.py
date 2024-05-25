@@ -1,5 +1,6 @@
+import json
 from typing import List, Optional
-from fastapi import FastAPI, Depends, File, UploadFile, HTTPException, Query
+from fastapi import FastAPI, Depends, File, Form, UploadFile, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from .wrappers.Wildbook import Wildbook
 import os
@@ -9,6 +10,7 @@ from sqlalchemy import func
 from .database import SessionLocal, engine, Base
 from .models import Seal, Sighting, Encounter
 from .schemas import (
+    DetectionRequest,
     SealCreate,
     Seal as SealSchema,
     SightingCreate,
@@ -207,6 +209,7 @@ def read_sighting(
         "images": sighting_images,
     }
 
+
 # Read Sighting from Date & Location
 @app.get("/sightings/search/")
 def filter_sightings(
@@ -215,7 +218,7 @@ def filter_sightings(
     wildbook: Wildbook = Depends(Wildbook),
     db: Session = Depends(get_db),
 ):
-    
+
     # Convert date string to datetime object if provided
     if date:
         try:
@@ -246,12 +249,13 @@ def filter_sightings(
         for encounter in sighting.encounters:
             annotation_image = wildbook.get_annotation_image(encounter.WildBookID)
             sighting_images.append(annotation_image)
-        
+
         sighting_dict = sighting.__dict__
         sighting_dict["images"] = sighting_images
         sightings_data.append(sighting_dict)
 
     return sightings_data
+
 
 # List Sightings with Pagination
 @app.get("/sightings")
@@ -314,9 +318,13 @@ def delete_sighting(sighting_id: int, db: Session = Depends(get_db)):
 
 @app.post("/detect")
 async def detect_seal(
+    names: str = Form(...),
     image: UploadFile = File(...),
     wildbook: Wildbook = Depends(Wildbook),
 ):
+    # Convert names from JSON string to list
+    names_list = json.loads(names)
+
     if not image:  # Check for image
         raise HTTPException(status_code=400, detail="No image uploaded")
 
@@ -338,13 +346,22 @@ async def detect_seal(
             [image_size],
         )
         # Match seal with seals in DB
-        scores = wildbook.seal_matching(aid_list[0])[:5]
+        scores = wildbook.seal_matching(aid_list[0], names_list)
 
     finally:
         # Clean up after upload
         os.remove(temp_image_path)
 
     return {"wildbook_id": aid_list[0], **scores}
+
+
+@app.get("/names")
+def get_names(wildbook: Wildbook = Depends(Wildbook)):
+    all_names_id = wildbook.list_names_id()
+
+    annotation_ids = wildbook.list_annotation_from_names(all_names_id)
+
+    return annotation_ids
 
 
 @app.post("/encounters", response_model=EncounterSchema)
