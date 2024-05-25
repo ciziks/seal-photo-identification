@@ -68,7 +68,7 @@
         <img class="cropped-image" :src="croppedImages[currentCroppedImageIndex][currentSubImageIndex]" alt="Cropped Image" />
         <div class="buttons">
           <button @click="detectImage">Detect</button>
-          <button @click="skipImage">Skip</button>
+          <button v-if="!isLastImage" @click="skipImage">Skip</button>
         </div>
         <div v-if="detectionResults.length" class="detection-results">
           <h3>Detection Results</h3>
@@ -76,6 +76,7 @@
             <p>Seal ID: {{ result.id }}</p>
             <p>Score: {{ result.score }}</p>
             <img :src="result.image" :alt="'Detected Image ' + index" class="detected-image"/>
+            <button @click="createEncounter(result.id)">Select</button>
           </div>
         </div>
       </div>
@@ -85,7 +86,7 @@
       {{ error }}
     </div>
     <div v-if="success" class="success-message">
-      Sighting added successfully!
+      Sighting and encounter added successfully!
     </div>
   </div>
 </template>
@@ -116,8 +117,16 @@ export default {
       currentCroppedImageIndex: 0,
       currentSubImageIndex: 0,
       detectionResults: [], // Array to hold detection results
-      annotationIds: [], // Store annotation IDs from the names endpoint
+      currentWildbookId: null, // Store the current wildbook_id from detection
     };
+  },
+  computed: {
+    isLastImage() {
+      return (
+        this.currentCroppedImageIndex === this.croppedImages.length - 1 &&
+        this.currentSubImageIndex === this.croppedImages[this.currentCroppedImageIndex].length - 1
+      );
+    },
   },
   methods: {
     triggerFileInput() {
@@ -181,12 +190,6 @@ export default {
         const response = await axios.post('http://localhost:5001/sightings', sightingData);
         this.sightingId = response.data.SightingID;
         console.log('Sighting added:', response.data);
-
-        /* Fetch annotation IDs from /names endpoint
-        const namesResponse = await axios.get('http://localhost:5001/names');
-        this.annotationIds = namesResponse.data.map(Number); // Convert strings to integers
-        console.log('Annotation IDs:', this.annotationIds);*/
-
         this.showCroppedImagesStep();
       } catch (error) {
         this.error = error.response?.data?.detail || error.message;
@@ -213,6 +216,7 @@ export default {
         });
 
         const scores = detectResponse.data;
+        this.currentWildbookId = scores.wildbook_id; // Store the wildbook_id
         this.detectionResults = Object.keys(scores).slice(1).map(key => ({
           id: key,
           score: scores[key].score,
@@ -221,6 +225,22 @@ export default {
 
         console.log('Detection results:', this.detectionResults);
 
+      } catch (error) {
+        this.error = error.response?.data?.detail || error.message;
+      }
+    },
+    async createEncounter(sealId) {
+      try {
+        const encounterData = {
+          SightingID: this.sightingId,
+          SealID: sealId,
+          WildBookID: this.currentWildbookId,
+        };
+
+        const response = await axios.post('http://localhost:5001/encounters', encounterData);
+        console.log('Encounter created:', response.data);
+
+        this.success = true;
       } catch (error) {
         this.error = error.response?.data?.detail || error.message;
       }
@@ -237,7 +257,9 @@ export default {
       } else {
         this.success = true; // All images processed
       }
-      this.detectionResults = []; // Clear previous detection results
+      // Reset data for a new detection operation
+      this.detectionResults = [];
+      this.currentWildbookId = null;
     },
   },
 };
