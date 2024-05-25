@@ -12,26 +12,28 @@
       <p>Location: {{ sighting.Location }}</p>
       <div v-for="(encounter, index) in uniqueEncounters" :key="index" class="seal">
         <div class="seal-header">
-          <h2 @click="fetchSeal(encounter.SealID)">{{ encounter.SealID }}</h2>
+          <h2 @click="goToSealDetails(encounter.SealID)" class="seal-name">{{ encounter.SealID }}</h2>
           <button v-if="getEncounterImages(index).length > 3" @click="nextImages(index)" class="next-button">
             <img src="@/assets/images/right_arrow.png" />
           </button>
         </div>
         <div class="seal-images">
-          <img v-for="(image, imgIndex) in getCurrentImages(index)" :key="imgIndex" :src="image" :alt="`Image of ${encounter.SealID}`" />
+          <img
+            v-for="(image, imgIndex) in getCurrentImages(index)"
+            :key="imgIndex"
+            :src="image"
+            :alt="`Image of ${encounter.SealID}`"
+            @click="openModal(image)"
+          />
         </div>
       </div>
     </div>
 
-    <div v-if="seal">
-      <h2>Seal Information</h2>
-      <p>ID: {{ seal.ID }}</p>
-      <p>Age: {{ seal.age }}</p>
-      <p>Gender: {{ seal.gender }}</p>
-      <p v-if="seal.comments">Comments: {{ seal.comments }}</p>
-      <p v-if="seal.isPregnant">Pregnant: {{ seal.isPregnant }}</p>
-      <div class="seal-images">
-        <img v-for="(image, index) in seal.images" :key="index" :src="image" alt="Seal Image" />
+    <!-- Image Modal -->
+    <div v-if="showModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button" @click="closeModal">&times;</span>
+        <img :src="currentImage" alt="Seal Image" class="modal-image" />
       </div>
     </div>
   </div>
@@ -39,6 +41,7 @@
 
 <script>
 import axios from 'axios';
+import { inject } from 'vue';
 
 export default {
   data() {
@@ -49,11 +52,19 @@ export default {
       imageIndices: {}, // Track current index for each encounter
       errorMessage: '',
       uniqueEncounters: [],
+      showModal: false,
+      currentImage: null,
     };
+  },
+  setup() {
+    const isLoading = inject('isLoading');
+    const setLoading = inject('setLoading');
+    return { isLoading, setLoading };
   },
   methods: {
     async fetchSighting() {
       try {
+        this.setLoading(true);
         const response = await axios.get(`http://localhost:5001/sightings/${this.sightingId}`);
         this.sighting = response.data;
         this.imageIndices = {}; // Reset image indices
@@ -76,6 +87,8 @@ export default {
         this.errorMessage = ''; // Clear error message if successful
       } catch (error) {
         this.errorMessage = 'Sighting not found';
+      } finally {
+        this.setLoading(false);
       }
     },
     getEncounterImages(index) {
@@ -95,13 +108,16 @@ export default {
       }
       this.imageIndices[index] = nextIndex;
     },
-    async fetchSeal(sealId) {
-      try {
-        const response = await axios.get(`http://localhost:5001/seals/${sealId}`);
-        this.seal = response.data;
-      } catch (error) {
-        alert('Seal not found');
-      }
+    goToSealDetails(sealId) {
+      this.$router.push({ name: 'SealDetails', params: { sealId } });
+    },
+    openModal(image) {
+      this.currentImage = image;
+      this.showModal = true;
+    },
+    closeModal() {
+      this.showModal = false;
+      this.currentImage = null;
     },
   },
 };
@@ -168,7 +184,15 @@ button:hover {
   justify-content: space-between;
   align-items: center;
   width: 100%;
+}
+
+.seal-name {
   cursor: pointer;
+  color: #007bff;
+}
+
+.seal-name:hover {
+  text-decoration: underline;
 }
 
 .seal-images {
@@ -186,17 +210,48 @@ button:hover {
   flex: 0 0 auto; /* Do not grow or shrink, use image's native size */
   object-fit: contain; /* Ensure full image is visible */
   margin-right: 10px; /* Space between images */
+  cursor: pointer;
 }
 
 .next-button {
   background: none;
   border: none;
-  cursor: pointer;
-  padding: 0;
 }
 
-.next-button img {
-  width: 50px; /* Adjust size as necessary */
-  height: 50px;
+.modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+}
+
+.modal-content {
+  position: relative;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  max-width: 80%;
+  max-height: 80%;
+  text-align: center;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 2em;
+  cursor: pointer;
+}
+
+.modal-image {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
 }
 </style>

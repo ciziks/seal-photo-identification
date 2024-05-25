@@ -1,11 +1,13 @@
 <template>
   <div id="app">
+    <loading-screen :isLoading="isLoading" />
     <div class="sidebar">
       <router-link to="/">
         <img src="@/assets/images/logo_64x64.jpeg" alt="Logo" class="logo"/>
       </router-link>
       <router-link to="/add-seal" class="btn btn-primary">Add Seal</router-link>
       <router-link to="/delete-seal" class="btn btn-primary">Delete Seal</router-link>
+      <router-link to="/find-seal" class="btn btn-primary">Find Seal</router-link>
       <router-link to="/list-seals" class="btn btn-primary">List seals</router-link>
       <router-link to="/add-sighting" class="btn btn-primary">Add Sighting</router-link>
       <router-link to="/delete-sighting" class="btn btn-primary">Delete Sighting</router-link>
@@ -16,6 +18,28 @@
     </div>
   </div>
 </template>
+
+<script>
+import { ref, provide } from 'vue';
+import LoadingScreen from './components/LoadingScreen.vue';
+
+export default {
+  components: {
+    LoadingScreen,
+  },
+  setup() {
+    const isLoading = ref(false);
+    const setLoading = (state) => {
+      isLoading.value = state;
+    };
+
+    provide('isLoading', isLoading);
+    provide('setLoading', setLoading);
+
+    return { isLoading, setLoading };
+  },
+};
+</script>
 
 <style>
 #app {

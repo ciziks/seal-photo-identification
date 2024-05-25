@@ -6,6 +6,8 @@ import DeleteSealView from '../views/DeleteSealView.vue';
 import AddSightingView from '../views/AddSightingView.vue';
 import DeleteSightingView from '../views/DeleteSightingView.vue';
 import ListSightingView from '../views/ListSightingView.vue';
+import SealDetailsView from '../views/SealDetailsView.vue';
+import FindSealView from '../views/FindSealView.vue';
 
 const routes = [
   {
@@ -50,7 +52,18 @@ const routes = [
     path: '/list-sighting',
     name: 'list-sighting',
     component: ListSightingView
-  }
+  },
+  {
+    path: '/seal/:sealId',
+    name: 'SealDetails',
+    component: SealDetailsView,
+    props: true,
+  },
+  {
+    path: '/find-seal',
+    name: 'FindSeal',
+    component: FindSealView,
+  },
 ]
 
 const router = createRouter({
