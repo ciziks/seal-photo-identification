@@ -2,6 +2,8 @@ import json
 from typing import List, Optional
 from fastapi import FastAPI, Depends, File, Form, UploadFile, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+import pandas as pd
 from .wrappers.Wildbook import Wildbook
 import os
 from datetime import datetime
@@ -418,3 +420,25 @@ def create_encounter(encounter: EncounterCreate, db: Session = Depends(get_db)):
     db.refresh(new_encounter)
 
     return new_encounter
+
+
+@app.get("/export")
+def export_data(db: Session = Depends(get_db)):
+    # Search for all data from the tables in DB
+    sightings = pd.read_sql(db.query(Sighting).statement, db.bind)
+    seals = pd.read_sql(db.query(Seal).statement, db.bind)
+    encounters = pd.read_sql(db.query(Encounter).statement, db.bind)
+
+    # Create a Excel file with this data
+    output_path = "database_export.xlsx"
+    with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
+        sightings.to_excel(writer, sheet_name="Sightings", index=False)
+        seals.to_excel(writer, sheet_name="Seals", index=False)
+        encounters.to_excel(writer, sheet_name="Encounters", index=False)
+
+    # Return the file as a response
+    return FileResponse(
+        output_path,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        filename=output_path,
+    )
