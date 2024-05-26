@@ -2,8 +2,21 @@
   <div class="list-sighting-view">
     <h1>List Sighting</h1>
     <div class="input-container">
-      <input v-model="sightingId" placeholder="Enter Sighting ID" />
-      <button @click="fetchSighting">Get Sighting</button>
+      <form @submit.prevent="fetchSighting">
+        <div>
+          <label for="date">Date:</label>
+          <input type="date" v-model="sightingDate" id="date" required />
+        </div>
+        <div>
+          <label for="location">Location:</label>
+          <select v-model="sightingLocation" id="location" required>
+            <option value="" disabled>Select Location</option>
+            <option value="field">Field</option>
+            <option value="centre">Centre</option>
+          </select>
+        </div>
+        <button type="submit">Get Sighting</button>
+      </form>
     </div>
     <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     <div v-if="sighting">
@@ -46,7 +59,8 @@ import { inject } from 'vue';
 export default {
   data() {
     return {
-      sightingId: '',
+      sightingDate: '',
+      sightingLocation: '',
       sighting: null,
       seal: null,
       imageIndices: {}, // Track current index for each encounter
@@ -65,8 +79,14 @@ export default {
     async fetchSighting() {
       try {
         this.setLoading(true);
-        const response = await axios.get(`http://localhost:5001/sightings/${this.sightingId}`);
-        this.sighting = response.data;
+        const formattedDate = this.sightingDate.split('-').reverse().join('-'); // Convert date to dd-mm-yyyy format
+        const response = await axios.get('http://localhost:5001/sightings/search/', {
+          params: {
+            date: formattedDate,
+            location: this.sightingLocation,
+          },
+        });
+        this.sighting = response.data[0]; // Assume the first result for now
         this.imageIndices = {}; // Reset image indices
 
         // Filter out duplicate encounters based on SealID
@@ -141,16 +161,19 @@ h1 {
 
 .input-container {
   display: flex;
+  flex-direction: column;
   align-items: center;
   margin-bottom: 20px;
 }
 
-input {
+input,
+select {
   padding: 10px;
   margin-right: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 1em;
+  margin-bottom: 10px;
 }
 
 button {

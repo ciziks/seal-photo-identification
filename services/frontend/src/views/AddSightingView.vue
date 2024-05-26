@@ -78,6 +78,7 @@
             <img :src="result.image" :alt="'Detected Image ' + index" class="detected-image"/>
             <button @click="createEncounter(result.id)">Select</button>
           </div>
+          <button @click="openNewSealModal">New Seal</button>
         </div>
       </div>
     </div>
@@ -87,6 +88,53 @@
     </div>
     <div v-if="success" class="success-message">
       Sighting and encounter added successfully!
+    </div>
+
+    <!-- New Seal Modal -->
+    <div v-if="showNewSealModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button" @click="closeNewSealModal">&times;</span>
+        <h2>Add New Seal</h2>
+        <form @submit.prevent="submitNewSeal">
+          <div class="form-group">
+            <label for="newSealID">ID/Name</label>
+            <input v-model="newSeal.ID" type="text" id="newSealID" required />
+          </div>
+          <div class="form-group">
+            <label for="newSealAge">Age</label>
+            <input v-model="newSeal.age" type="text" id="newSealAge" required />
+          </div>
+          <div class="form-group">
+            <label for="newSealComments">Comments</label>
+            <textarea v-model="newSeal.comments" id="newSealComments"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="newSealGender">Gender</label>
+            <select v-model="newSeal.gender" id="newSealGender">
+              <option value="">Select Gender</option>
+              <option value="m">Male</option>
+              <option value="f">Female</option>
+              <option value="u">Unknown</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="newSealIsPregnant">Is Pregnant</label>
+            <select v-model="newSeal.isPregnant" id="newSealIsPregnant">
+              <option value="">Select Option</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+              <option value="Unknown">Unknown</option>
+            </select>
+          </div>
+          <button type="submit">Add Seal</button>
+        </form>
+        <div v-if="newSealError" class="error-message">
+          {{ newSealError }}
+        </div>
+        <div v-if="newSealSuccess" class="success-message">
+          Seal added successfully!
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -119,6 +167,16 @@ export default {
       annotationIds: [], // Store annotation IDs from the names endpoint
       detectionResults: [], // Array to hold detection results
       currentWildbookId: null, // Store the current wildbook_id from detection
+      showNewSealModal: false, // Show/Hide New Seal Modal
+      newSeal: {
+        ID: '',
+        age: '',
+        comments: '',
+        gender: '',
+        isPregnant: '',
+      },
+      newSealError: null,
+      newSealSuccess: false,
     };
   },
   computed: {
@@ -269,6 +327,29 @@ export default {
       this.detectionResults = [];
       this.currentWildbookId = null;
     },
+    openNewSealModal() {
+      this.showNewSealModal = true;
+    },
+    closeNewSealModal() {
+      this.showNewSealModal = false;
+    },
+    async submitNewSeal() {
+      try {
+        this.newSealError = null;
+        this.newSealSuccess = false;
+
+        const response = await axios.post('http://localhost:5001/seal', this.newSeal);
+        console.log('New seal added:', response.data);
+
+        const newSealId = response.data.ID;
+        await this.createEncounter(newSealId);
+
+        this.newSealSuccess = true;
+        this.closeNewSealModal();
+      } catch (error) {
+        this.newSealError = error.response?.data?.detail || error.message;
+      }
+    },
   },
 };
 </script>
@@ -362,5 +443,78 @@ export default {
 .success-message {
   color: green;
   margin-top: 20px;
+}
+
+.modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+}
+
+.modal-content {
+  position: relative;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  max-width: 80%;
+  max-height: 80%;
+  text-align: center;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 2em;
+  cursor: pointer;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+label {
+  margin: 10px 0 5px;
+}
+
+input[type="text"],
+textarea,
+select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button[type="submit"] {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+.data {
+  color: #333;
+}
+
+.no-data {
+  color: #888;
+  font-style: italic;
 }
 </style>
