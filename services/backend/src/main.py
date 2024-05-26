@@ -223,7 +223,6 @@ def filter_sightings(
     if date:
         try:
             parsed_date = datetime.strptime(date, "%d-%m-%Y")
-            print(f"Parsed date: {parsed_date}")
         except ValueError:
             raise HTTPException(
                 status_code=400, detail="Invalid date format. Use 'dd-mm-yyyy'."
@@ -313,6 +312,35 @@ def delete_sighting(sighting_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Sighting not found")
     db.delete(db_sighting)
     db.commit()
+    return db_sighting
+
+
+@app.delete("/sightings/{location}/{date}", response_model=SightingSchema)
+def delete_sighting_by_date_location(
+    date: str, location: str, db: Session = Depends(get_db)
+):
+    try:
+        parsed_date = datetime.strptime(date, "%d-%m-%Y")
+    except ValueError:
+        raise HTTPException(
+            status_code=400, detail="Invalid date format. Use 'dd-mm-yyyy'."
+        )
+
+    db_sighting = (
+        db.query(Sighting)
+        .filter(
+            func.date(Sighting.Date) == parsed_date.date(),
+            Sighting.Location == location,
+        )
+        .first()
+    )
+
+    if not db_sighting:
+        raise HTTPException(status_code=404, detail="Sighting not found")
+
+    db.delete(db_sighting)
+    db.commit()
+
     return db_sighting
 
 
