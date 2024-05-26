@@ -116,6 +116,7 @@ export default {
       showCroppedImages: false,
       currentCroppedImageIndex: 0,
       currentSubImageIndex: 0,
+      annotationIds: [], // Store annotation IDs from the names endpoint
       detectionResults: [], // Array to hold detection results
       currentWildbookId: null, // Store the current wildbook_id from detection
     };
@@ -190,6 +191,12 @@ export default {
         const response = await axios.post('http://localhost:5001/sightings', sightingData);
         this.sightingId = response.data.SightingID;
         console.log('Sighting added:', response.data);
+
+        // Fetch annotation IDs from /names endpoint
+        const namesResponse = await axios.get('http://localhost:5001/names');
+        this.annotationIds = namesResponse.data.map(Number); // Convert strings to integers
+        console.log('Annotation IDs:', this.annotationIds);
+
         this.showCroppedImagesStep();
       } catch (error) {
         this.error = error.response?.data?.detail || error.message;
@@ -208,7 +215,8 @@ export default {
         const blob = await response.blob();
         const formData = new FormData();
         formData.append('image', blob, 'cropped_image.png');
-
+        formData.append('names', JSON.stringify(this.annotationIds));
+        
         const detectResponse = await axios.post('http://localhost:5001/detect', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
