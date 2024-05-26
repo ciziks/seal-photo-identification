@@ -12,6 +12,7 @@
       <router-link to="/add-sighting" class="btn btn-primary">Add Sighting</router-link>
       <router-link to="/delete-sighting" class="btn btn-primary">Delete Sighting</router-link>
       <router-link to="/list-sighting" class="btn btn-primary">List sighting</router-link>
+      <router-link to="/user-guide" class="btn btn-primary user-guide">User Guide</router-link> 
     </div>
     <div class="content">
       <router-view/>
@@ -77,5 +78,8 @@ export default {
 }
 .logo {
   cursor: pointer; /* Optional: changes cursor on hover to indicate clickability */
+}
+.user-guide {
+  margin-top: auto; /* Pushes the User Guide link to the bottom of the sidebar */
 }
 </style>

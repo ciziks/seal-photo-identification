@@ -8,6 +8,7 @@ import DeleteSightingView from '../views/DeleteSightingView.vue';
 import ListSightingView from '../views/ListSightingView.vue';
 import SealDetailsView from '../views/SealDetailsView.vue';
 import FindSealView from '../views/FindSealView.vue';
+import UserGuideView from '../views/UserGuideView.vue';
 
 const routes = [
   {
@@ -64,6 +65,11 @@ const routes = [
     name: 'FindSeal',
     component: FindSealView,
   },
+  {
+    path: '/user-guide',
+    name: 'userGuide',
+    component: UserGuideView,
+  }
 ]
 
 const router = createRouter({
