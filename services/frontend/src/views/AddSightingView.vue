@@ -1,5 +1,6 @@
 <template>
   <div class="add-sighting-view">
+    <loading-screen :isLoading="isLoading" />
     <h1>Add Sighting</h1>
     <div v-if="!showCroppedImages">
       <form @submit.prevent="prepareCroppedImagesStep">
@@ -156,10 +157,12 @@
 import VueCropper from 'vue-cropperjs';
 import 'cropperjs/dist/cropper.css';
 import axios from 'axios';
+import LoadingScreen from '@/components/LoadingScreen.vue';
 
 export default {
   components: {
     VueCropper,
+    LoadingScreen,
   },
   data() {
     return {
@@ -192,6 +195,7 @@ export default {
       newSealSuccess: false,
       showModal: false,
       currentImage: null,
+      isLoading: false, // For loading screen
     };
   },
   computed: {
@@ -250,6 +254,7 @@ export default {
     },
     async prepareCroppedImagesStep() {
       try {
+        this.isLoading = true;
         this.error = null;
         this.success = false;
 
@@ -273,6 +278,8 @@ export default {
         this.showCroppedImagesStep();
       } catch (error) {
         this.error = error.response?.data?.detail || error.message;
+      } finally {
+        this.isLoading = false;
       }
     },
     showCroppedImagesStep() {
@@ -280,6 +287,7 @@ export default {
     },
     async detectImage() {
       try {
+        this.isLoading = true;
         this.error = null;
         this.success = false;
 
@@ -308,6 +316,8 @@ export default {
 
       } catch (error) {
         this.error = error.response?.data?.detail || error.message;
+      } finally {
+        this.isLoading = false;
       }
     },
     async createEncounter(sealId) {

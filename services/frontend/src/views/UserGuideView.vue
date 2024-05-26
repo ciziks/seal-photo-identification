@@ -77,6 +77,7 @@
                 <li>Click the 'Find Seal' button to view the seal's details.</li>
                 <li>You will be redirected to the seal's profile page, where you can see all the information about the seal.</li>
                 <li>On the seal's profile page, you can click the 'Edit' button to modify the seal's information.</li>
+                <p>Note: It is recommended to keep the same notation when editing the seal information (e.g. m for male, f for female and u for unknown (regarding gender)).</p>
               </ul>
             `,
           },
