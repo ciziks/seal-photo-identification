@@ -9,6 +9,7 @@ import ListSightingView from '../views/ListSightingView.vue';
 import SealDetailsView from '../views/SealDetailsView.vue';
 import FindSealView from '../views/FindSealView.vue';
 import UserGuideView from '../views/UserGuideView.vue';
+import ExportView from '../views/ExportView.vue';
 
 const routes = [
   {
@@ -69,6 +70,11 @@ const routes = [
     path: '/user-guide',
     name: 'userGuide',
     component: UserGuideView,
+  },
+  {
+    path: '/export',
+    name: 'export',
+    component: ExportView,
   }
 ]
 
