@@ -112,16 +112,18 @@
             `,
           },
           deleteSighting: {
-            title: 'Delete Sighting',
-            body: `
-              <p>The "Delete Sighting" functionality allows you to remove an existing sighting from the database. Follow these steps to delete a sighting:</p>
-              <ul>
-                <li>Enter the ID of the sighting you wish to delete.</li>
-                <li>Click the 'Delete' button to remove the sighting.</li>
-              </ul>
-              <p>Note: All related encounters are deleted from the database, but the seals from those encounters remain unaffected.</p>
+             title: 'Delete Sighting',
+             body: `
+             <p>The "Delete Sighting" functionality allows you to remove an existing sighting from the database based on the date and location. Follow these steps to delete a sighting:</p>
+             <ul>
+                 <li>Select the date of the sighting you wish to delete using the date picker.</li>
+                 <li>Choose the location of the sighting from the dropdown menu (either "Field" or "Centre").</li>
+                 <li>Click the 'Delete' button to remove the sighting.</li>
+             </ul>
+             <p>Note: All related encounters are deleted from the database, but the seals from those encounters remain unaffected.</p>
             `,
-          },
+            },
+
           listSighting: {
             title: 'List Sighting',
             body: `
