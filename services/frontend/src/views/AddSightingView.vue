@@ -75,7 +75,12 @@
           <div v-for="(result, index) in detectionResults" :key="index" class="result">
             <p>Seal ID: {{ result.id }}</p>
             <p>Score: {{ result.score }}</p>
-            <img :src="result.image" :alt="'Detected Image ' + index" class="detected-image"/>
+            <img
+              :src="result.image"
+              :alt="'Detected Image ' + index"
+              class="detected-image"
+              @click="openModal(result.image)"
+            />
             <button @click="createEncounter(result.id)">Select</button>
           </div>
           <button @click="openNewSealModal">New Seal</button>
@@ -136,6 +141,14 @@
         </div>
       </div>
     </div>
+
+    <!-- Image Modal -->
+    <div v-if="showModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button" @click="closeModal">&times;</span>
+        <img :src="currentImage" alt="Seal Image" class="modal-image" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -177,6 +190,8 @@ export default {
       },
       newSealError: null,
       newSealSuccess: false,
+      showModal: false,
+      currentImage: null,
     };
   },
   computed: {
@@ -350,6 +365,14 @@ export default {
         this.newSealError = error.response?.data?.detail || error.message;
       }
     },
+    openModal(image) {
+      this.currentImage = image;
+      this.showModal = true;
+    },
+    closeModal() {
+      this.showModal = false;
+      this.currentImage = null;
+    },
   },
 };
 </script>
@@ -433,6 +456,7 @@ export default {
   max-width: 100px;
   max-height: 100px;
   margin-top: 10px;
+  cursor: pointer;
 }
 
 .error-message {
@@ -474,6 +498,12 @@ export default {
   right: 10px;
   font-size: 2em;
   cursor: pointer;
+}
+
+.modal-image {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
 }
 
 form {
