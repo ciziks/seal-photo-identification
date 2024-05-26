@@ -286,13 +286,10 @@ class Wildbook:
         return
 
     # Method to perform seal matching with all annotations
-    def seal_matching(self, annotation_id: str) -> dict:
+    def seal_matching(self, annotation_id: str, comparison_list: List[str]) -> dict:
         endpoint = f"{self.base_url}/api/query/chip/dict/simple"
 
-        all_names_id = self.list_names_id()
-        annotation_ids = self.list_annotation_from_names(all_names_id)
-
-        payload = {"qaid_list": annotation_ids, "daid_list": [annotation_id]}
+        payload = {"qaid_list": comparison_list, "daid_list": [annotation_id]}
 
         response = requests.get(endpoint, json=payload)
         response_json = response.json()

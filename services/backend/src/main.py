@@ -318,9 +318,12 @@ def delete_sighting(sighting_id: int, db: Session = Depends(get_db)):
 
 @app.post("/detect")
 async def detect_seal(
+    names: str = Form(...),
     image: UploadFile = File(...),
     wildbook: Wildbook = Depends(Wildbook),
 ):
+    # Convert names from JSON string to list
+    names_list = json.loads(names)
 
     if not image:  # Check for image
         raise HTTPException(status_code=400, detail="No image uploaded")
@@ -343,7 +346,7 @@ async def detect_seal(
             [image_size],
         )
         # Match seal with seals in DB
-        scores = wildbook.seal_matching(aid_list[0])
+        scores = wildbook.seal_matching(aid_list[0], names_list)
 
     finally:
         # Clean up after upload
