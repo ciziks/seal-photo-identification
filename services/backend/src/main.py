@@ -431,17 +431,24 @@ def create_encounter(encounter: EncounterCreate, db: Session = Depends(get_db)):
 
 @app.get("/export")
 def export_data(db: Session = Depends(get_db)):
-    # Search for all data from the tables in DB
+    # Query all data from the tables
     sightings = pd.read_sql(db.query(Sighting).statement, db.bind)
     seals = pd.read_sql(db.query(Seal).statement, db.bind)
     encounters = pd.read_sql(db.query(Encounter).statement, db.bind)
 
-    # Create a Excel file with this data
-    output_path = "database_export.xlsx"
+    # Merge the data into a single DataFrame
+    merged_data = sightings.merge(
+        encounters, how="left", left_on="SightingID", right_on="SightingID"
+    )
+    merged_data = merged_data.merge(seals, how="left", left_on="SealID", right_on="ID")
+
+    # Drop redundant columns if necessary
+    merged_data.drop(columns=["ID"], inplace=True)
+
+    # Create a Pandas Excel writer using openpyxl as the engine
+    output_path = "sealcenter_data.xlsx"
     with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
-        sightings.to_excel(writer, sheet_name="Sightings", index=False)
-        seals.to_excel(writer, sheet_name="Seals", index=False)
-        encounters.to_excel(writer, sheet_name="Encounters", index=False)
+        merged_data.to_excel(writer, sheet_name="SealCenter", index=False)
 
     # Return the file as a response
     return FileResponse(
