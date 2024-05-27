@@ -169,7 +169,7 @@ class Wildbook:
         for aid in response_json.get("response", None):
             if aid:
                 
-                annotations_id.append(int(aid[0]))
+                annotations_id.append(int(aid[-1]))
 
         return annotations_id
 
