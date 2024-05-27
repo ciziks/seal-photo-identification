@@ -166,9 +166,10 @@ class Wildbook:
             return Exception(status.get("message"))
 
         annotations_id = []
-        for name in response_json.get("response", None):
-            if name:
-                annotations_id.append(int(name[0]))
+        for aid in response_json.get("response", None):
+            if aid:
+                
+                annotations_id.append(int(aid[0]))
 
         return annotations_id
 
@@ -286,10 +287,12 @@ class Wildbook:
         return
 
     # Method to perform seal matching with all annotations
-    def seal_matching(self, annotation_id: str, comparison_list: List[str]) -> dict:
+    def seal_matching(
+        self, annotation_ids: List[str], comparison_list: List[str]
+    ) -> dict:
         endpoint = f"{self.base_url}/api/query/chip/dict/simple"
 
-        payload = {"qaid_list": comparison_list, "daid_list": [annotation_id]}
+        payload = {"qaid_list": comparison_list, "daid_list": annotation_ids}
 
         response = requests.get(endpoint, json=payload)
         response_json = response.json()
@@ -298,21 +301,26 @@ class Wildbook:
         if not status.get("success", None):
             return Exception(status.get("message"))
 
-        comparison_scores = {}
+        comparison_scores = {annotation: {} for annotation in annotation_ids}
         for comparison in response_json["response"]:
-            score = comparison["score_list"] if comparison["score_list"] else 1
-            comparison_scores[self.get_annotation_name(comparison["qaid"])] = {
-                "score": score[0],
-                "image": self.get_annotation_image(comparison["qaid"]),
-            }
+            compared_aid = comparison["qaid"]
+            scores = comparison["score_list"] if comparison["score_list"] else 1
 
-        # Sorting scores
-        sorted_scores = dict(
-            sorted(
-                comparison_scores.items(),
+            for index, annotation in enumerate(annotation_ids):
+                comparison_scores[annotation][
+                    self.get_annotation_name(compared_aid)
+                ] = {
+                    "score": scores[index],
+                    "image": self.get_annotation_image(compared_aid),
+                }
+
+        for annotation_key in comparison_scores:
+            # Sort comparisons by score
+            sorted_scores = sorted(
+                comparison_scores[annotation_key].items(),
                 key=lambda item: item[1]["score"],
                 reverse=True,
             )[:5]
-        )
+            comparison_scores[annotation_key] = dict(sorted_scores)
 
-        return sorted_scores
+        return comparison_scores

@@ -349,40 +349,47 @@ def delete_sighting_by_date_location(
 @app.post("/detect")
 async def detect_seal(
     names: str = Form(...),
-    image: UploadFile = File(...),
+    images: List[UploadFile] = File(...),
     wildbook: Wildbook = Depends(Wildbook),
 ):
     # Convert names from JSON string to list
     names_list = json.loads(names)
 
-    if not image:  # Check for image
-        raise HTTPException(status_code=400, detail="No image uploaded")
+    if not images or len(images) == 0:
+        raise HTTPException(status_code=400, detail="No images uploaded")
+
+    image_id_list = []
 
     # Save the image temporarily
-    temp_image_path = "temp_image_storage.png"
-    with open(temp_image_path, "wb") as f:
-        f.write(await image.read())
+    for image in images:
+        temp_image_path = "temp_image_storage.png"
+        with open(temp_image_path, "wb") as f:
+            f.write(await image.read())
 
-    try:
-        # Upload image
-        image_id = wildbook.upload_image(temp_image_path)
+        try:
+            # Upload image
+            image_id_list.append(wildbook.upload_image(temp_image_path))
 
-        # Get Image Size
-        image_size = [0, 0] + list(wildbook.get_images_size([image_id])[0])
+        finally:
+            # Clean up after upload
+            os.remove(temp_image_path)
 
-        # Create Annotation in WildBook
-        aid_list = wildbook.create_annotations(
-            [image_id],
-            [image_size],
-        )
-        # Match seal with seals in DB
-        scores = wildbook.seal_matching(aid_list[0], names_list)
+    # Get Image Size
+    image_id_lists = [
+        [0, 0] + list(image_size_list)
+        for image_size_list in wildbook.get_images_size(image_id_list)
+    ]
 
-    finally:
-        # Clean up after upload
-        os.remove(temp_image_path)
+    # Create Annotation in WildBook
+    annotation_id_list = wildbook.create_annotations(
+        image_id_list,
+        image_id_lists,
+    )
 
-    return {"wildbook_id": aid_list[0], **scores}
+    # Match seal with seals in DB
+    scores = wildbook.seal_matching(annotation_id_list, names_list)
+
+    return scores
 
 
 @app.get("/names")
