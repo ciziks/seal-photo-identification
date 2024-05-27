@@ -2,7 +2,7 @@ BEGIN TRANSACTION;
 CREATE TABLE IF NOT EXISTS "Seals" (
     "ID" TEXT PRIMARY KEY,
     "age" TEXT,
-    "comments" TEXT,
+    "description" TEXT,
     "gender" TEXT,
     "isPregnant" TEXT
 );

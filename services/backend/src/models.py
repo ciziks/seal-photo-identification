@@ -8,7 +8,7 @@ class Seal(Base):
 
     ID = Column(String, primary_key=True, index=True)
     age = Column(String, nullable=True)
-    comments = Column(String, nullable=True)
+    description = Column(String, nullable=True)
     gender = Column(String, nullable=True)
     isPregnant = Column(String, nullable=True)
     encounters = relationship(

@@ -2,18 +2,22 @@ from typing import List, Optional
 from pydantic import BaseModel, validator
 from datetime import datetime
 
+
 class DetectionRequest(BaseModel):
     names: List[str]
+
 
 class SealBase(BaseModel):
     ID: str
     age: str
-    comments: Optional[str] = None
+    description: Optional[str] = None
     gender: Optional[str] = None
     isPregnant: Optional[str] = None
 
+
 class SealCreate(SealBase):
     pass
+
 
 class EncounterSchema(BaseModel):
     SightingID: int
@@ -23,10 +27,12 @@ class EncounterSchema(BaseModel):
     class Config:
         orm_mode = True
 
+
 class EncounterCreate(BaseModel):
     SightingID: int
     SealID: str
     WildBookID: int
+
 
 class Encounter(BaseModel):
     SightingID: int
@@ -36,15 +42,18 @@ class Encounter(BaseModel):
     class Config:
         orm_mode = True
 
+
 class Seal(SealBase):
     encounters: List[EncounterSchema] = []
 
     class Config:
         orm_mode = True
 
+
 class SightingBase(BaseModel):
     Date: datetime
     Location: str
+
 
 class SightingCreate(SightingBase):
     @validator("Date", pre=True)
@@ -52,6 +61,7 @@ class SightingCreate(SightingBase):
         if isinstance(value, str):
             return datetime.strptime(value, "%d/%m/%Y")
         return value
+
 
 class Sighting(SightingBase):
     SightingID: int
