@@ -6,7 +6,7 @@
       <p>ID: {{ seal.ID }}</p>
       <p>Age: {{ seal.age }}</p>
       <p>Gender: {{ seal.gender }}</p>
-      <p>Comments: <span v-if="seal.comments" class="data">{{ seal.comments }}</span><span v-else class="no-data"><em>no data</em></span></p>
+      <p>Description: <span v-if="seal.description" class="data">{{ seal.description }}</span><span v-else class="no-data"><em>no data</em></span></p>
       <p>Pregnant: <span v-if="seal.isPregnant" class="data">{{ seal.isPregnant }}</span><span v-else class="no-data"><em>no data</em></span></p>
       <div class="seal-images-grid">
         <div v-for="(image, index) in seal.images" :key="index" class="image-container" @click="openModal(image)">
@@ -36,8 +36,8 @@
           <label for="gender">Gender:</label>
           <input type="text" v-model="editSeal.gender" id="gender" />
 
-          <label for="comments">Comments:</label>
-          <textarea v-model="editSeal.comments" id="comments"></textarea>
+          <label for="description">Description:</label>
+          <textarea v-model="editSeal.description" id="description"></textarea>
 
           <label for="isPregnant">Pregnant:</label>
           <input type="text" v-model="editSeal.isPregnant" id="isPregnant" />
@@ -65,7 +65,7 @@ export default {
       editSeal: {
         age: '',
         gender: '',
-        comments: '',
+        description: '',
         isPregnant: '',
       },
     };
