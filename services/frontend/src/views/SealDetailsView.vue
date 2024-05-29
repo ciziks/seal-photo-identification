@@ -3,6 +3,7 @@
     <h1>Seal Details</h1>
     <div v-if="seal">
       <button class="edit-button" @click="openEditModal">Edit</button>
+      <button class="delete-button" @click="openDeleteModal">Delete</button>
       <p>ID: {{ seal.ID }}</p>
       <p>Age: {{ seal.age }}</p>
       <p>Gender: {{ seal.gender }}</p>
@@ -31,19 +32,43 @@
         <h2>Edit Seal Information</h2>
         <form @submit.prevent="updateSeal">
           <label for="age">Age:</label>
-          <input type="text" v-model="editSeal.age" id="age" />
+          <select v-model="editSeal.age" id="age">
+            <option value="pup">Pup</option>
+            <option value="adult">Adult</option>
+            <option value="juvenile">Juvenile</option>
+            <option value="unknown">Unknown</option>
+          </select>
 
           <label for="gender">Gender:</label>
-          <input type="text" v-model="editSeal.gender" id="gender" />
+          <select v-model="editSeal.gender" id="gender">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="unknown">Unknown</option>
+          </select>
 
           <label for="description">Description:</label>
           <textarea v-model="editSeal.description" id="description"></textarea>
 
           <label for="isPregnant">Pregnant:</label>
-          <input type="text" v-model="editSeal.isPregnant" id="isPregnant" />
+          <select v-model="editSeal.isPregnant" id="isPregnant">
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+            <option value="unknown">Unknown</option>
+          </select>
 
           <button type="submit">Confirm</button>
         </form>
+      </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div v-if="showDeleteModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button" @click="closeDeleteModal">&times;</span>
+        <h2>Confirm Delete</h2>
+        <p>Are you sure you want to delete this seal? This action cannot be undone.</p>
+        <button class="confirm-delete-button" @click="deleteSeal">Confirm</button>
+        <button class="cancel-delete-button" @click="closeDeleteModal">Cancel</button>
       </div>
     </div>
   </div>
@@ -62,6 +87,7 @@ export default {
       showModal: false,
       currentImage: null,
       showEditModal: false,
+      showDeleteModal: false,
       editSeal: {
         age: '',
         gender: '',
@@ -114,6 +140,20 @@ export default {
         this.errorMessage = error.response?.data?.detail || error.message;
       }
     },
+    openDeleteModal() {
+      this.showDeleteModal = true;
+    },
+    closeDeleteModal() {
+      this.showDeleteModal = false;
+    },
+    async deleteSeal() {
+      try {
+        await axios.delete(`http://localhost:5001/seals/${this.sealId}`);
+        this.$router.push('/seals'); // Redirect to seal list after deletion
+      } catch (error) {
+        this.errorMessage = 'Failed to delete seal';
+      }
+    },
   },
 };
 </script>
@@ -154,20 +194,30 @@ h1 {
   cursor: pointer;
 }
 
-.edit-button {
-  position: absolute;
-  top: 20px;
-  right: 20px;
+.edit-button,
+.delete-button {
   padding: 10px 20px;
-  background-color: #007bff;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  margin: 5px;
+}
+
+.edit-button {
+  background-color: #007bff;
 }
 
 .edit-button:hover {
   background-color: #0056b3;
+}
+
+.delete-button {
+  background-color: #dc3545;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
 }
 
 .modal {
@@ -218,7 +268,8 @@ label {
 }
 
 input[type="text"],
-textarea {
+textarea,
+select {
   width: 100%;
   padding: 8px;
   margin-bottom: 10px;
@@ -246,5 +297,33 @@ button[type="submit"]:hover {
 .no-data {
   color: #888;
   font-style: italic;
+}
+
+.confirm-delete-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.confirm-delete-button:hover {
+  background-color: #c82333;
+}
+
+.cancel-delete-button {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.cancel-delete-button:hover {
+  background-color: #5a6268;
 }
 </style>

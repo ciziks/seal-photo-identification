@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import ListSealsView from '../views/ListSealsView';
 import NewSealView from '../views/NewSealView.vue';
-import DeleteSealView from '../views/DeleteSealView.vue';
 import NewSightingView from '../views/NewSightingView.vue';
 import DeleteSightingView from '../views/DeleteSightingView.vue';
 import FindSightingView from '../views/FindSightingView.vue';
@@ -26,11 +25,6 @@ const routes = [
     path: '/new-seal',
     name: 'new-seal',
     component: NewSealView
-  },
-  {
-    path: '/delete-seal',
-    name: 'delete-seal',
-    component: DeleteSealView
   },
   {
     path: '/new-sighting',

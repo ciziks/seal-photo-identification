@@ -12,7 +12,6 @@
       <router-link to="/find-seal" class="btn btn-primary">Find Seal</router-link>
       <router-link to="/export" class="btn btn-primary">Export Database</router-link>
 
-      <router-link to="/delete-seal" class="btn btn-primary">Delete Seal</router-link>
       <router-link to="/delete-sighting" class="btn btn-primary">Delete Sighting</router-link>
       
       
