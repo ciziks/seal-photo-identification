@@ -1,43 +1,69 @@
 <template>
   <div class="find-sighting-view">
-    <h1>Find Sighting</h1>
-    <div class="input-container">
-      <form @submit.prevent="fetchSighting">
-        <div>
-          <label for="date">Date:</label>
-          <input type="date" v-model="sightingDate" id="date" required />
+    <div class="split-container">
+      <div class="left-container">
+        <h2>Find Sighting</h2>
+        <div class="input-container">
+          <form @submit.prevent="fetchSighting">
+            <div>
+              <label for="date">Date:</label>
+              <input type="date" v-model="sightingDate" id="date" required />
+            </div>
+            <div>
+              <label for="location">Location:</label>
+              <select v-model="sightingLocation" id="location" required>
+                <option value="" disabled>Select Location</option>
+                <option value="field">Field</option>
+                <option value="centre">Centre</option>
+              </select>
+            </div>
+            <button type="submit">Find Sighting</button>
+          </form>
         </div>
-        <div>
-          <label for="location">Location:</label>
-          <select v-model="sightingLocation" id="location" required>
-            <option value="" disabled>Select Location</option>
-            <option value="field">Field</option>
-            <option value="centre">Centre</option>
-          </select>
+        <p v-if="fetchErrorMessage" class="error-message">{{ fetchErrorMessage }}</p>
+        <div v-if="sighting">
+          <h2>Sighting Information</h2>
+          <p>Date: {{ sighting.Date }}</p>
+          <p>Location: {{ sighting.Location }}</p>
+          <div v-for="(encounter, index) in uniqueEncounters" :key="index" class="seal">
+            <div class="seal-header">
+              <h2 @click="goToSealDetails(encounter.SealID)" class="seal-name">{{ encounter.SealID }}</h2>
+              <button v-if="getEncounterImages(index).length > 3" @click="nextImages(index)" class="next-button">
+                <img src="@/assets/images/right_arrow.png" />
+              </button>
+            </div>
+            <div class="seal-images">
+              <img
+                v-for="(image, imgIndex) in getCurrentImages(index)"
+                :key="imgIndex"
+                :src="image"
+                :alt="`Image of ${encounter.SealID}`"
+                @click="openModal(image)"
+              />
+            </div>
+          </div>
         </div>
-        <button type="submit">Find Sighting</button>
-      </form>
-    </div>
-    <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-    <div v-if="sighting">
-      <h2>Sighting Information</h2>
-      <p>Date: {{ sighting.Date }}</p>
-      <p>Location: {{ sighting.Location }}</p>
-      <div v-for="(encounter, index) in uniqueEncounters" :key="index" class="seal">
-        <div class="seal-header">
-          <h2 @click="goToSealDetails(encounter.SealID)" class="seal-name">{{ encounter.SealID }}</h2>
-          <button v-if="getEncounterImages(index).length > 3" @click="nextImages(index)" class="next-button">
-            <img src="@/assets/images/right_arrow.png" />
-          </button>
-        </div>
-        <div class="seal-images">
-          <img
-            v-for="(image, imgIndex) in getCurrentImages(index)"
-            :key="imgIndex"
-            :src="image"
-            :alt="`Image of ${encounter.SealID}`"
-            @click="openModal(image)"
-          />
+      </div>
+      <div class="right-container">
+        <h2>Delete Sighting</h2>
+        <div class="delete-container">
+          <form @submit.prevent="openDeleteModal">
+            <div>
+              <label for="delete-date">Date:</label>
+              <input type="date" v-model="deleteDate" id="delete-date" required />
+            </div>
+            <div>
+              <label for="delete-location">Location:</label>
+              <select v-model="deleteLocation" id="delete-location" required>
+                <option value="" disabled>Select Location</option>
+                <option value="field">Field</option>
+                <option value="centre">Centre</option>
+              </select>
+            </div>
+            <button type="submit">Delete</button>
+          </form>
+          <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+          <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
         </div>
       </div>
     </div>
@@ -47,6 +73,17 @@
       <div class="modal-content">
         <span class="close-button" @click="closeModal">&times;</span>
         <img :src="currentImage" alt="Seal Image" class="modal-image" />
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button" @click="closeDeleteModal">&times;</span>
+        <h2>Confirm Delete</h2>
+        <p>Are you sure you want to delete this sighting? This action cannot be undone.</p>
+        <button class="confirm-delete-button" @click="deleteSighting">Confirm</button>
+        <button class="cancel-delete-button" @click="closeDeleteModal">Cancel</button>
       </div>
     </div>
   </div>
@@ -64,10 +101,15 @@ export default {
       sighting: null,
       seal: null,
       imageIndices: {}, // Track current index for each encounter
-      errorMessage: '',
+      fetchErrorMessage: '',
       uniqueEncounters: [],
       showModal: false,
       currentImage: null,
+      deleteDate: '',
+      deleteLocation: '',
+      showDeleteModal: false,
+      errorMessage: '',
+      successMessage: ''
     };
   },
   setup() {
@@ -104,9 +146,9 @@ export default {
           this.imageIndices[index] = 0;
         });
 
-        this.errorMessage = ''; // Clear error message if successful
+        this.fetchErrorMessage = ''; // Clear error message if successful
       } catch (error) {
-        this.errorMessage = 'Sighting not found';
+        this.fetchErrorMessage = 'Sighting not found';
       } finally {
         this.setLoading(false);
       }
@@ -139,6 +181,34 @@ export default {
       this.showModal = false;
       this.currentImage = null;
     },
+    openDeleteModal() {
+      this.showDeleteModal = true;
+    },
+    closeDeleteModal() {
+      this.showDeleteModal = false;
+    },
+    async deleteSighting() {
+      try {
+        this.errorMessage = null;
+        this.successMessage = false;
+
+        // Format the date to dd-mm-yyyy
+        const formattedDate = this.deleteDate.split('-').reverse().join('-');
+        
+        await axios.delete(`http://localhost:5001/sightings/${this.deleteLocation}/${formattedDate}`);
+        
+        this.successMessage = 'Sighting deleted successfully!';
+        this.deleteDate = '';
+        this.deleteLocation = '';
+        this.closeDeleteModal();
+      } catch (error) {
+        if (error.response && error.response.status === 404) {
+          this.errorMessage = 'Sighting not found.';
+        } else {
+          this.errorMessage = 'An error occurred while deleting the sighting.';
+        }
+      }
+    }
   },
 };
 </script>
@@ -153,27 +223,36 @@ export default {
   box-sizing: border-box; /* Ensure padding is included in element's total width and height */
 }
 
+.split-container {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.left-container, .right-container {
+  width: 48%;
+}
+
 h1 {
   margin-bottom: 20px;
   font-size: 2em;
   color: #333;
 }
 
-.input-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 20px;
+h2 {
+  margin-bottom: 10px;
+  font-size: 1.5em;
+  color: #333;
 }
 
-input,
-select {
+input, select {
   padding: 10px;
   margin-right: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 1em;
   margin-bottom: 10px;
+  width: calc(100% - 22px); /* Full width minus padding and border */
 }
 
 button {
@@ -191,6 +270,11 @@ button:hover {
 
 .error-message {
   color: red;
+  margin-bottom: 20px;
+}
+
+.success-message {
+  color: green;
   margin-bottom: 20px;
 }
 
@@ -276,5 +360,33 @@ button:hover {
   max-width: 100%;
   max-height: 80vh;
   object-fit: contain;
+}
+
+.confirm-delete-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.confirm-delete-button:hover {
+  background-color: #c82333;
+}
+
+.cancel-delete-button {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.cancel-delete-button:hover {
+  background-color: #5a6268;
 }
 </style>

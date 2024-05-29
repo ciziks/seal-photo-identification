@@ -3,7 +3,6 @@ import HomeView from '../views/HomeView.vue'
 import ListSealsView from '../views/ListSealsView';
 import NewSealView from '../views/NewSealView.vue';
 import NewSightingView from '../views/NewSightingView.vue';
-import DeleteSightingView from '../views/DeleteSightingView.vue';
 import FindSightingView from '../views/FindSightingView.vue';
 import SealDetailsView from '../views/SealDetailsView.vue';
 import FindSealView from '../views/FindSealView.vue';
@@ -30,11 +29,6 @@ const routes = [
     path: '/new-sighting',
     name: 'new-sighting',
     component: NewSightingView
-  },
-  {
-    path: '/delete-sighting',
-    name: 'delete-sighting',
-    component: DeleteSightingView
   },
   {
     path: '/find-sighting',

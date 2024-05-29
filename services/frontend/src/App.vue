@@ -11,10 +11,6 @@
       <router-link to="/list-seals" class="btn btn-primary">List seals</router-link>
       <router-link to="/find-seal" class="btn btn-primary">Find Seal</router-link>
       <router-link to="/export" class="btn btn-primary">Export Database</router-link>
-
-      <router-link to="/delete-sighting" class="btn btn-primary">Delete Sighting</router-link>
-      
-      
       <router-link to="/user-guide" class="btn btn-primary user-guide">User Guide</router-link> 
     </div>
     <div class="content">
