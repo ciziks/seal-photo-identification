@@ -1,6 +1,5 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional
 import requests
-import json
 
 
 class Wildbook:
@@ -35,7 +34,7 @@ class Wildbook:
         return image_id
 
     # Method to remove image from DB
-    def remove_image(self, image_uuid_list: List[str]) -> None:
+    def remove_image(self, image_uuid_list: List[str]) -> bool:
         endpoint = f"{self.base_url}/api/image/json/"
         payload = {"image_uuid_list": image_uuid_list}
 
@@ -43,10 +42,8 @@ class Wildbook:
         response_json = response.json()
 
         status = response_json.get("status")
-        if not status.get("success", None):
-            return Exception(status.get("message"))
 
-        return
+        return bool(status.get("success", None))
 
     # Method to get all Image's ID in DB
     def list_images_id(self):
@@ -54,10 +51,6 @@ class Wildbook:
 
         response = requests.get(endpoint)
         response_json = response.json()
-
-        status = response_json.get("status")
-        if not status.get("success", None):
-            return Exception(status.get("message"))
 
         return response_json.get("response", None)
 
@@ -68,10 +61,6 @@ class Wildbook:
 
         response = requests.get(endpoint, params=payload)
         response_json = response.json()
-
-        status = response_json.get("status")
-        if not status.get("success", None):
-            return Exception(status.get("message"))
 
         return [uuid["__UUID__"] for uuid in response_json.get("response", None)]
 
@@ -90,7 +79,7 @@ class Wildbook:
         status_width = not response_width_json.get("status", None)
 
         if status_height or status_width:
-            return Exception("Error in Height or Width Request from WildBook")
+            return []
 
         return list(
             zip(
@@ -121,7 +110,7 @@ class Wildbook:
 
         status = response_json.get("status")
         if not status.get("success", None):
-            return Exception(status.get("message"))
+            return []
 
         annotation_ids = response_json["response"]
 
@@ -135,10 +124,6 @@ class Wildbook:
         response = requests.get(endpoint, json=payload)
         response_json = response.json()
 
-        status = response_json.get("status")
-        if not status.get("success", None):
-            return Exception(status.get("message"))
-
         return response_json.get("response", None)
 
     # Method to list names
@@ -147,10 +132,6 @@ class Wildbook:
 
         response = requests.get(endpoint)
         response_json = response.json()
-
-        status = response_json.get("status")
-        if not status.get("success", None):
-            return Exception(status.get("message"))
 
         return response_json.get("response", None)
 
@@ -161,14 +142,10 @@ class Wildbook:
         response = requests.get(endpoint, json={"nid_list": names_list})
         response_json = response.json()
 
-        status = response_json.get("status")
-        if not status.get("success", None):
-            return Exception(status.get("message"))
-
         annotations_id = []
         for aid in response_json.get("response", None):
             if aid:
-                
+
                 annotations_id.append(int(aid[-1]))
 
         return annotations_id
@@ -179,10 +156,6 @@ class Wildbook:
 
         response = requests.get(endpoint)
         response_json = response.json()
-
-        status = response_json.get("status")
-        if not status.get("success", None):
-            return Exception(status.get("message"))
 
         annotations_uuid = [
             uuid["__UUID__"] for uuid in response_json.get("response", None)
@@ -200,10 +173,6 @@ class Wildbook:
         response = requests.get(endpoint, json=payload)
         response_json = response.json()
 
-        status = response_json.get("status")
-        if not status.get("success", None):
-            return Exception(status.get("message"))
-
         seal_name: str = response_json["response"][0]
 
         return seal_name
@@ -214,10 +183,6 @@ class Wildbook:
 
         response = requests.get(endpoint)
         response_json = response.json()
-
-        status = response_json.get("status")
-        if not status.get("success", None):
-            return Exception(status.get("message"))
 
         image_url = response_json["response"]
 
@@ -236,16 +201,12 @@ class Wildbook:
         response = requests.put(endpoint, json=payload)
         response_json = response.json()
 
-        status = response_json.get("status")
-        if not status.get("success", None):
-            raise Exception(status.get("message"))
-
-        return response_json.get("response")[0]
+        return response_json.get("response")[0] if response_json.get("response") else []
 
     # Method to rename the animals in Annotations
     def rename_annotations(
         self, annot_id_list: List[str], name_list: List[str]
-    ) -> None:
+    ) -> bool:
         endpoint = f"{self.base_url}/api/annot/name/"
         payload = {"aid_list": annot_id_list, "name_list": name_list}
 
@@ -253,13 +214,12 @@ class Wildbook:
         response_json = response.json()
 
         status = response_json.get("status")
-        if not status.get("success", None):
-            return Exception(status.get("message"))
 
-        return
+        return bool(status.get("success", None))
+
 
     # Method to mark annotation as Exemplar
-    def mark_as_exemplar(self, annot_id_list: List[str]) -> None:
+    def mark_as_exemplar(self, annot_id_list: List[str]) -> bool:
         endpoint = f"{self.base_url}/api/annot/exemplar/"
         payload = {"aid_list": annot_id_list, "flag_list": [1] * len(annot_id_list)}
 
@@ -267,13 +227,11 @@ class Wildbook:
         response_json = response.json()
 
         status = response_json.get("status")
-        if not status.get("success", None):
-            return Exception(status.get("message"))
 
-        return
+        return bool(status.get("success", None))
 
     # Method to remove Annotation from database
-    def remove_annotation(self, annot_uuid_list: List[str]) -> None:
+    def remove_annotation(self, annot_uuid_list: List[str]) -> bool:
         endpoint = f"{self.base_url}/api/image/json/"
         payload = {"annot_uuid_list": annot_uuid_list}
 
@@ -281,12 +239,9 @@ class Wildbook:
         response_json = response.json()
 
         status = response_json.get("status")
-        if not status.get("success", None):
-            return Exception(status.get("message"))
+        return bool(status.get("success", None))
 
-        return
-
-    # Method to perform seal matching with all annotations
+    # Method to perform seal matching with specific annotations
     def seal_matching(
         self, annotation_ids: List[str], comparison_list: List[str]
     ) -> dict:
@@ -296,10 +251,6 @@ class Wildbook:
 
         response = requests.get(endpoint, json=payload)
         response_json = response.json()
-
-        status = response_json.get("status")
-        if not status.get("success", None):
-            return Exception(status.get("message"))
 
         comparison_scores = {annotation: {} for annotation in annotation_ids}
         for comparison in response_json["response"]:

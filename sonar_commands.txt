@@ -1,0 +1,26 @@
+Source: https://www.youtube.com/watch?v=6vdRvz_LnbQ&ab_channel=ProgrammingKnowledge
+###################################################
+1. Install SonarQube with Docker and PostGres
+
+docker pull sonarqube
+
+docker run -d --name sonarqube-db -e POSTGRES_USER=sonar -e POSTGRES_PASSWORD=sonar -e POSTGRES_DB=sonarqube postgres:alpine
+
+###################################################
+2. Run SonarQube 
+
+docker run -d --name sonarqube -p 9000:9000 --link sonarqube-db:db -e SONAR_JDBC_URL=jdbc:postgresql://db:5432/sonarqube -e SONAR_JDBC_USERNAME=sonar -e SONAR_JDBC_PASSWORD=sonar sonarqube
+
+###################################################
+3. Install Sonar Scanner
+
+https://docs.sonarsource.com/sonarqube/10.5/analyzing-source-code/scanners/sonarscanner/
+
+###################################################
+4. Code Analysis
+
+path/to/bin/sonar-scanner \
+  -Dsonar.projectKey=seal-photo-identification \
+  -Dsonar.sources=. \
+  -Dsonar.host.url=http://localhost:9000 \
+  -Dsonar.token=
