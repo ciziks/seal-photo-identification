@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from src.wildbook import Wildbook
 from src.constants import SEAL_NOT_FOUND_MESSAGE, SEAL_ALREADY_EXISTS_MESSAGE
 from src.crud.seal import SealDAO
-from src.crud.sighting import SightingCRUD
+from src.crud.sighting import SightingDAO
 from src.schemas import Seal, SealCreate
 
 router = APIRouter()
@@ -25,7 +25,7 @@ def read_seal(
     seal_id: str,
     wildbook: Wildbook = Depends(Wildbook),
     crud_seal: SealDAO = Depends(),
-    crud_sighting: SightingCRUD = Depends(),
+    crud_sighting: SightingDAO = Depends(),
 ):
     seal = crud_seal.get_seal(seal_id=seal_id)
 
