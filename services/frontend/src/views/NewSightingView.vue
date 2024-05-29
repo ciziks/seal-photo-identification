@@ -65,23 +65,27 @@
 
     <div v-else class="cropped-images-step">
       <h2>Process Cropped Images</h2>
-      <div v-if="detectionResults[currentCroppedImageIndex]">
-        <h3>Cropped Image</h3>
+      <div v-if="croppedImages[currentCroppedImageIndex]">
         <img class="cropped-image" :src="croppedImages[currentCroppedImageIndex][currentSubImageIndex]" alt="Cropped Image" />
-        <h3>Detection Results</h3>
-        <div v-for="(result, index) in detectionResults[currentCroppedImageIndex]" :key="index" class="result">
-          <p>Seal ID: {{ result.id }}</p>
-          <p>Score: {{ result.score }}</p>
-          <img
-            :src="result.image"
-            :alt="'Detected Image ' + index"
-            class="detected-image"
-            @click="openModal(croppedImages[currentCroppedImageIndex][currentSubImageIndex], result.image)"
-          />
-          <button @click="createEncounter(result.id)">Select</button>
+        <div class="buttons">
+          <button @click="detectImage">Detect</button>
+          <button v-if="!isLastImage" @click="skipImage">Skip</button>
         </div>
-        <button v-if="currentCroppedImageIndex < croppedImages.length - 1" @click="nextCroppedImage">Next Image</button>
-        <button v-else @click="finishProcess">Finish</button>
+        <div v-if="detectionResults.length" class="detection-results">
+          <h3>Detection Results</h3>
+          <div v-for="(result, index) in detectionResults" :key="index" class="result">
+            <p>Seal ID: {{ result.id }}</p>
+            <p>Score: {{ result.score }}</p>
+            <img
+              :src="result.image"
+              :alt="'Detected Image ' + index"
+              class="detected-image"
+              @click="openModal(result.image)"
+            />
+            <button @click="createEncounter(result.id)">Select</button>
+          </div>
+          <button @click="openNewSealModal">New Seal</button>
+        </div>
       </div>
     </div>
 
@@ -104,13 +108,7 @@
           </div>
           <div class="form-group">
             <label for="newSealAge">Age</label>
-            <select v-model="newSeal.age" id="newSealAge" required>
-              <option value="">Select Age</option>
-              <option value="pup">Pup</option>
-              <option value="adult">Adult</option>
-              <option value="juvenile">Juvenile</option>
-              <option value="unknown">Unknown</option>
-            </select>
+            <input v-model="newSeal.age" type="text" id="newSealAge" required />
           </div>
           <div class="form-group">
             <label for="newSealComments">Comments</label>
@@ -129,9 +127,9 @@
             <label for="newSealIsPregnant">Is Pregnant</label>
             <select v-model="newSeal.isPregnant" id="newSealIsPregnant">
               <option value="">Select Option</option>
-              <option value="y">Yes</option>
-              <option value="n">No</option>
-              <option value="u">Unknown</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+              <option value="Unknown">Unknown</option>
             </select>
           </div>
           <button type="submit">Add Seal</button>
@@ -147,12 +145,9 @@
 
     <!-- Image Modal -->
     <div v-if="showModal" class="modal">
-      <div class="modal-content split-modal">
+      <div class="modal-content">
         <span class="close-button" @click="closeModal">&times;</span>
-        <div class="image-container">
-          <img :src="croppedImage" alt="Cropped Image" class="modal-image" />
-          <img :src="resultImage" alt="Detected Image" class="modal-image" />
-        </div>
+        <img :src="currentImage" alt="Seal Image" class="modal-image" />
       </div>
     </div>
   </div>
@@ -185,7 +180,7 @@ export default {
       showCroppedImages: false,
       currentCroppedImageIndex: 0,
       currentSubImageIndex: 0,
-      detectionResults: [], // Array to hold detection results for all cropped images
+      detectionResults: [], // Array to hold detection results
       currentWildbookId: null, // Store the current wildbook_id from detection
       showNewSealModal: false, // Show/Hide New Seal Modal
       newSeal: {
@@ -198,10 +193,17 @@ export default {
       newSealError: null,
       newSealSuccess: false,
       showModal: false,
-      croppedImage: null,
-      resultImage: null,
+      currentImage: null,
       isLoading: false, // For loading screen
     };
+  },
+  computed: {
+    isLastImage() {
+      return (
+        this.currentCroppedImageIndex === this.croppedImages.length - 1 &&
+        this.currentSubImageIndex === this.croppedImages[this.currentCroppedImageIndex].length - 1
+      );
+    },
   },
   methods: {
     triggerFileInput() {
@@ -266,52 +268,6 @@ export default {
         const response = await axios.post('http://localhost:5001/sightings', sightingData);
         this.sightingId = response.data.SightingID;
         console.log('Sighting added:', response.data);
-        
-        // Adding a 1-second delay before detecting images
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        this.detectImages();
-      } catch (error) {
-        this.error = error.response?.data?.detail || error.message;
-      } finally {
-        this.isLoading = false;
-      }
-    },
-    async detectImages() {
-      try {
-        this.isLoading = true;
-        this.error = null;
-
-        const formData = new FormData();
-        const imageBlobs = await Promise.all(
-          this.croppedImages.flat().map(async (image) => {
-            const response = await fetch(image);
-            return response.blob();
-          })
-        );
-
-        imageBlobs.forEach((blob, index) => {
-          formData.append('images', blob, `image${index + 1}.png`);
-        });
-
-        const detectResponse = await axios.post('http://localhost:5001/detect', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-
-        const scores = detectResponse.data;
-        this.detectionResults = this.croppedImages.map((_, index) => {
-          const wildbookId = scores[index].wildbook_id;
-          return Object.keys(scores[index])
-            .filter((key) => key !== 'wildbook_id')
-            .map((key) => ({
-              id: key,
-              score: scores[index][key].score,
-              image: scores[index][key].image,
-              wildbookId: wildbookId,
-            }));
-        });
 
         this.showCroppedImagesStep();
       } catch (error) {
@@ -322,6 +278,40 @@ export default {
     },
     showCroppedImagesStep() {
       this.showCroppedImages = true;
+    },
+    async detectImage() {
+      try {
+        this.isLoading = true;
+        this.error = null;
+        this.success = false;
+
+        const croppedImageUrl = this.croppedImages[this.currentCroppedImageIndex][this.currentSubImageIndex];
+        const response = await fetch(croppedImageUrl);
+        const blob = await response.blob();
+        const formData = new FormData();
+        formData.append('image', blob, 'cropped_image.png');
+        
+        const detectResponse = await axios.post('http://localhost:5001/detect', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        const scores = detectResponse.data;
+        this.currentWildbookId = scores.wildbook_id; // Store the wildbook_id
+        this.detectionResults = Object.keys(scores).slice(1).map(key => ({
+          id: key,
+          score: scores[key].score,
+          image: scores[key].image,
+        }));
+
+        console.log('Detection results:', this.detectionResults);
+
+      } catch (error) {
+        this.error = error.response?.data?.detail || error.message;
+      } finally {
+        this.isLoading = false;
+      }
     },
     async createEncounter(sealId) {
       try {
@@ -339,8 +329,13 @@ export default {
         this.error = error.response?.data?.detail || error.message;
       }
     },
+    skipImage() {
+      this.nextCroppedImage();
+    },
     nextCroppedImage() {
-      if (this.currentCroppedImageIndex < this.croppedImages.length - 1) {
+      if (this.currentSubImageIndex < this.croppedImages[this.currentCroppedImageIndex].length - 1) {
+        this.currentSubImageIndex++;
+      } else if (this.currentCroppedImageIndex < this.croppedImages.length - 1) {
         this.currentCroppedImageIndex++;
         this.currentSubImageIndex = 0;
       } else {
@@ -349,9 +344,6 @@ export default {
       // Reset data for a new detection operation
       this.detectionResults = [];
       this.currentWildbookId = null;
-    },
-    finishProcess() {
-      this.success = true;
     },
     openNewSealModal() {
       this.showNewSealModal = true;
@@ -376,15 +368,13 @@ export default {
         this.newSealError = error.response?.data?.detail || error.message;
       }
     },
-    openModal(croppedImage, resultImage) {
-      this.croppedImage = croppedImage;
-      this.resultImage = resultImage;
+    openModal(image) {
+      this.currentImage = image;
       this.showModal = true;
     },
     closeModal() {
       this.showModal = false;
-      this.croppedImage = null;
-      this.resultImage = null;
+      this.currentImage = null;
     },
   },
 };
@@ -503,8 +493,6 @@ export default {
   max-width: 80%;
   max-height: 80%;
   text-align: center;
-  display: flex;
-  justify-content: space-between;
 }
 
 .close-button {
@@ -516,20 +504,50 @@ export default {
 }
 
 .modal-image {
-  max-width: 45%;
+  max-width: 100%;
   max-height: 80vh;
   object-fit: contain;
 }
 
-.split-modal {
+form {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-.image-container {
-  display: flex;
-  justify-content: space-between;
+label {
+  margin: 10px 0 5px;
+}
+
+input[type="text"],
+textarea,
+select {
   width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button[type="submit"] {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+.data {
+  color: #333;
+}
+
+.no-data {
+  color: #888;
+  font-style: italic;
 }
 </style>
