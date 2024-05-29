@@ -4,6 +4,7 @@ from src.models import Seal
 from src.schemas import SealCreate
 from src.database import get_db
 
+
 class SealCRUD:
     def __init__(self, db: Session = Depends(get_db)):
         self.db = db

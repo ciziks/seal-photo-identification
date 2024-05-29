@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from src.wildbook import Wildbook
 from src.constants import SEAL_NOT_FOUND_MESSAGE, SEAL_ALREADY_EXISTS_MESSAGE
 from src.crud.seal import SealCRUD
+from src.crud.sighting import SightingCRUD
 from src.schemas import Seal, SealCreate
 
 router = APIRouter()
@@ -24,6 +25,7 @@ def read_seal(
     seal_id: str,
     wildbook: Wildbook = Depends(Wildbook),
     crud_seal: SealCRUD = Depends(),
+    crud_sighting: SightingCRUD = Depends(),
 ):
     seal = crud_seal.get_seal(seal_id=seal_id)
 
@@ -32,7 +34,7 @@ def read_seal(
 
     seal_encounters = []
     for encounter in seal.encounters:
-        sighting = crud_seal.get_sighting_from_id(sighting_id=encounter.SightingID)
+        sighting = crud_sighting.get_sighting_from_id(sighting_id=encounter.SightingID)
         annotation_image = wildbook.get_annotation_image(encounter.WildBookID)
         encounter_data = {
             "WildBookID": encounter.WildBookID,
