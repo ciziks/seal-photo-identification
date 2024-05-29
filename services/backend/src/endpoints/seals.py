@@ -37,12 +37,20 @@ def read_seal(
     if not seal:
         raise HTTPException(status_code=404, detail=SEAL_NOT_FOUND_MESSAGE)
 
-    seal_images = []
+    seal_encounters = []
     for encounter in seal.encounters:
+        sighting = crud.get_sighting_from_id(db, sighting_id=encounter.SightingID)
         annotation_image = wildbook.get_annotation_image(encounter.WildBookID)
-        seal_images.append(annotation_image)
+        encounter_data = {
+            "WildBookID": encounter.WildBookID,
+            "Date": sighting.Date if sighting else None,
+            "Location": sighting.Location if sighting else None,
+            "image": annotation_image
+        }
+        seal_encounters.append(encounter_data)
+        
 
-    return {**seal.__dict__, "images": seal_images}
+    return {**seal.__dict__, "encounters": seal_encounters}
 
 
 # LIST SEAL WITH PAGINATION
