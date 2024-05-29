@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.wildbook import Wildbook
 from src.database import get_db
-from src import crud, schemas, constants
+from src.constants import SEAL_NOT_FOUND_MESSAGE, SEAL_ALREADY_EXISTS_MESSAGE
+from src import crud, schemas
 
 router = APIRouter()
 
@@ -18,7 +19,7 @@ def create_seal(
 
     if db_seal:
         raise HTTPException(
-            status_code=400, detail=constants.SEAL_ALREADY_EXISTS_MESSAGE
+            status_code=400, detail=SEAL_ALREADY_EXISTS_MESSAGE
         )
 
     return crud.create_seal(db=db, seal=seal)
@@ -34,7 +35,7 @@ def read_seal(
     seal = crud.get_seal(db, seal_id=seal_id)
 
     if not seal:
-        raise HTTPException(status_code=404, detail=constants.SEAL_ERROR_MESSAGE)
+        raise HTTPException(status_code=404, detail=SEAL_NOT_FOUND_MESSAGE)
 
     seal_images = []
     for encounter in seal.encounters:
@@ -78,7 +79,7 @@ def update_seal(seal_id: str, seal: schemas.SealCreate, db: Session = Depends(ge
     db_seal = crud.get_seal(db, seal_id=seal_id)
 
     if db_seal is None:
-        raise HTTPException(status_code=404, detail=constants.SEAL_NOT_FOUND_MESSAGE)
+        raise HTTPException(status_code=404, detail=SEAL_NOT_FOUND_MESSAGE)
 
     return crud.update_seal(db=db, db_seal=db_seal, seal=seal)
 
@@ -89,6 +90,6 @@ def delete_seal(seal_id: str, db: Session = Depends(get_db)):
     db_seal = crud.get_seal(db, seal_id=seal_id)
 
     if db_seal is None:
-        raise HTTPException(status_code=404, detail=constants.SEAL_NOT_FOUND_MESSAGE)
+        raise HTTPException(status_code=404, detail=SEAL_NOT_FOUND_MESSAGE)
 
-    return crud.delete_seal(db=db, db_seal=db_seal)
+    return crud.delete_seal(db=db, seal=db_seal)
