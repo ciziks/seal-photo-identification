@@ -149,7 +149,8 @@ export default {
     async deleteSeal() {
       try {
         await axios.delete(`http://localhost:5001/seals/${this.sealId}`);
-        this.$router.push('/seals'); // Redirect to seal list after deletion
+        alert('Seal deleted succesfully!')
+        location.reload(); // Reload the page
       } catch (error) {
         this.errorMessage = 'Failed to delete seal';
       }
