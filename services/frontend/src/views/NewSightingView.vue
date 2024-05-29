@@ -266,6 +266,9 @@ export default {
         const response = await axios.post('http://localhost:5001/sightings', sightingData);
         this.sightingId = response.data.SightingID;
         console.log('Sighting added:', response.data);
+        
+        // Adding a 1-second delay before detecting images
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         this.detectImages();
       } catch (error) {
