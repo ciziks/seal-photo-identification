@@ -2,11 +2,6 @@ from typing import List, Optional
 from pydantic import BaseModel, validator
 from datetime import datetime
 
-
-class DetectionRequest(BaseModel):
-    names: List[str]
-
-
 class SealBase(BaseModel):
     ID: str
     age: str

@@ -247,7 +247,7 @@ class Wildbook:
     ) -> dict:
         endpoint = f"{self.base_url}/api/query/chip/dict/simple"
 
-        payload = {"qaid_list": comparison_list, "daid_list": annotation_ids}
+        payload = {"qaid_list": comparison_list[:100], "daid_list": annotation_ids}
 
         response = requests.get(endpoint, json=payload)
         response_json = response.json()

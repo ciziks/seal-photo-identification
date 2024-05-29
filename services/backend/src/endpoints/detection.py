@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, File, Form, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from typing import List
-import json
 import os
 from src.wildbook import Wildbook
 from src import constants
