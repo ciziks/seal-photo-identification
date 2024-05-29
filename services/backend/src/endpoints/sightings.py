@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from src import constants
 from src.wildbook import Wildbook
-from src.crud.sighting import SightingCRUD
+from src.crud.sighting import SightingDAO
 from src.schemas import Sighting, SightingCreate
 
 router = APIRouter()
@@ -13,14 +13,12 @@ router = APIRouter()
 @router.post("", response_model=Sighting)
 def create_sighting(
     sighting: SightingCreate,
-    crud_sighting: SightingCRUD = Depends(),
+    crud_sighting: SightingDAO = Depends(),
 ):
-    existing_sighting = crud_sighting.get_sighting_from_date_location(
-        sighting.Date, sighting.Location
-    )
+    existing_sighting = crud_sighting.find_sighting(sighting.Date, sighting.Location)
 
     if existing_sighting:
-        new_sighting = existing_sighting
+        new_sighting = existing_sighting[0]
     else:
         new_sighting = crud_sighting.create_sighting(sighting=sighting)
 
@@ -32,7 +30,7 @@ def create_sighting(
 def read_sighting(
     sighting_id: int,
     wildbook: Wildbook = Depends(Wildbook),
-    crud_sighting: SightingCRUD = Depends(),
+    crud_sighting: SightingDAO = Depends(),
 ):
     db_sighting = crud_sighting.get_sighting_from_id(sighting_id=sighting_id)
 
@@ -55,11 +53,11 @@ def read_sighting(
 
 # LIST SIGHTINGS WITH PAGINATION
 @router.get("")
-def list_sightings_with_pagination(
+def list_sightings(
     skip: int = 0,
     limit: int = 10,
     wildbook: Wildbook = Depends(Wildbook),
-    crud_sighting: SightingCRUD = Depends(),
+    crud_sighting: SightingDAO = Depends(),
 ):
     total_sightings, sightings = crud_sighting.list_sightings(
         skip=skip,
@@ -90,7 +88,7 @@ def list_sightings_with_pagination(
 def update_sighting(
     sighting_id: int,
     sighting: SightingCreate,
-    crud_sighting: SightingCRUD = Depends(),
+    crud_sighting: SightingDAO = Depends(),
 ):
     db_sighting = crud_sighting.get_sighting_from_id(sighting_id=sighting_id)
 
@@ -104,7 +102,7 @@ def update_sighting(
 
 # DELETE SIGHTING AND RELATED ENCOUNTERS BY SIGHTING_ID
 @router.delete("/{sighting_id}", response_model=Sighting)
-def delete_sighting(sighting_id: int, crud_sighting: SightingCRUD = Depends()):
+def delete_sighting(sighting_id: int, crud_sighting: SightingDAO = Depends()):
     db_sighting = crud_sighting.get_sighting_from_id(sighting_id=sighting_id)
 
     if db_sighting is None:
@@ -118,7 +116,7 @@ def delete_sighting(sighting_id: int, crud_sighting: SightingCRUD = Depends()):
 # DELETE SIGHTING AND RELATED ENCOUNTERS BY DATE AND LOCATION
 @router.delete("/{location}/{date}", response_model=Sighting)
 def delete_sighting_by_date_location(
-    date: str, location: str, crud_sighting: SightingCRUD = Depends()
+    date: str, location: str, crud_sighting: SightingDAO = Depends()
 ):
     try:
         parsed_date = datetime.strptime(date, "%d-%m-%Y")
@@ -137,11 +135,11 @@ def delete_sighting_by_date_location(
 
 # SEARCH SIGHTING BY DATE AND LOCATION
 @router.get("/search/")
-def filter_sightings(
+def search_sightings(
     date: Optional[str] = Query(None, description="Date in 'dd-mm-yyyy' format"),
     location: Optional[str] = Query(None, description="Location of the sighting"),
     wildbook: Wildbook = Depends(Wildbook),
-    crud_sighting: SightingCRUD = Depends(),
+    crud_sighting: SightingDAO = Depends(),
 ):
     if date:
         try:

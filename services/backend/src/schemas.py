@@ -2,17 +2,6 @@ from typing import List, Optional
 from pydantic import BaseModel, validator
 from datetime import datetime
 
-class SealBase(BaseModel):
-    ID: str
-    age: str
-    description: Optional[str] = None
-    gender: Optional[str] = None
-    isPregnant: Optional[str] = None
-
-
-class SealCreate(SealBase):
-    pass
-
 
 class EncounterSchema(BaseModel):
     SightingID: int
@@ -23,34 +12,34 @@ class EncounterSchema(BaseModel):
         orm_mode = True
 
 
-class EncounterCreate(BaseModel):
-    SightingID: int
-    SealID: str
-    WildBookID: int
+class EncounterCreate(EncounterSchema):
+    ...
+    
+class SealSchema(BaseModel):
+    ID: str
+    age: str
+    description: Optional[str] = None
+    gender: Optional[str] = None
+    isPregnant: Optional[str] = None
 
 
-class Encounter(BaseModel):
-    SightingID: int
-    SealID: str
-    WildBookID: int
-
-    class Config:
-        orm_mode = True
+class SealCreate(SealSchema):
+    pass
 
 
-class Seal(SealBase):
+class Seal(SealSchema):
     encounters: List[EncounterSchema] = []
 
     class Config:
         orm_mode = True
 
 
-class SightingBase(BaseModel):
+class SightingSchema(BaseModel):
     Date: datetime
     Location: str
 
 
-class SightingCreate(SightingBase):
+class SightingCreate(SightingSchema):
     @validator("Date", pre=True)
     def parse_date(cls, value):
         if isinstance(value, str):
@@ -58,7 +47,7 @@ class SightingCreate(SightingBase):
         return value
 
 
-class Sighting(SightingBase):
+class Sighting(SightingSchema):
     SightingID: int
     encounters: List[EncounterSchema] = []
     images: List[str] = []

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from src.wildbook import Wildbook
 from src.constants import SEAL_NOT_FOUND_MESSAGE, SEAL_ALREADY_EXISTS_MESSAGE
-from src.crud.seal import SealCRUD
+from src.crud.seal import SealDAO
 from src.crud.sighting import SightingCRUD
 from src.schemas import Seal, SealCreate
 
@@ -10,7 +10,7 @@ router = APIRouter()
 
 # CREATE NEW SEAL
 @router.post("", response_model=Seal)
-def create_seal(seal: SealCreate, crud_seal: SealCRUD = Depends()):
+def create_seal(seal: SealCreate, crud_seal: SealDAO = Depends()):
     db_seal = crud_seal.get_seal(seal_id=seal.ID)
 
     if db_seal:
@@ -24,7 +24,7 @@ def create_seal(seal: SealCreate, crud_seal: SealCRUD = Depends()):
 def read_seal(
     seal_id: str,
     wildbook: Wildbook = Depends(Wildbook),
-    crud_seal: SealCRUD = Depends(),
+    crud_seal: SealDAO = Depends(),
     crud_sighting: SightingCRUD = Depends(),
 ):
     seal = crud_seal.get_seal(seal_id=seal_id)
@@ -53,7 +53,7 @@ def list_seals_with_pagination(
     skip: int = 0,
     limit: int = 10,
     wildbook: Wildbook = Depends(Wildbook),
-    crud_seal: SealCRUD = Depends(),
+    crud_seal: SealDAO = Depends(),
 ):
     total_seals, seals = crud_seal.list_seals(skip=skip, limit=limit)
 
@@ -77,7 +77,7 @@ def list_seals_with_pagination(
 
 # UPDATE SEAL INFORMATION
 @router.put("/{seal_id}", response_model=Seal)
-def update_seal(seal_id: str, seal: SealCreate, crud_seal: SealCRUD = Depends()):
+def update_seal(seal_id: str, seal: SealCreate, crud_seal: SealDAO = Depends()):
     db_seal = crud_seal.get_seal(seal_id=seal_id)
 
     if db_seal is None:
@@ -88,7 +88,7 @@ def update_seal(seal_id: str, seal: SealCreate, crud_seal: SealCRUD = Depends())
 
 # DELETE SEAL REGISTER AND RELATED ENCOUNTERS
 @router.delete("/{seal_id}", response_model=Seal)
-def delete_seal(seal_id: str, crud_seal: SealCRUD = Depends()):
+def delete_seal(seal_id: str, crud_seal: SealDAO = Depends()):
     db_seal = crud_seal.get_seal(seal_id=seal_id)
 
     if db_seal is None:
