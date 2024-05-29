@@ -1,6 +1,6 @@
 <template>
-    <div class="add-seal-view">
-      <h1>Add New Seal</h1>
+    <div class="new-seal-view">
+      <h1>New Seal</h1>
       <form @submit.prevent="submitForm">
         <div class="form-group">
           <label for="ID">ID/Name</label>
@@ -11,8 +11,8 @@
           <input v-model="seal.age" type="text" id="age" required />
         </div>
         <div class="form-group">
-          <label for="comments">Comments</label>
-          <textarea v-model="seal.comments" id="comments"></textarea>
+          <label for="description">Description</label>
+          <textarea v-model="seal.description" id="description"></textarea>
         </div>
         <div class="form-group">
           <label for="gender">Gender</label>
@@ -32,7 +32,7 @@
             <option value="Unknown">Unknown</option>
           </select>
         </div>
-        <button type="submit">Add Seal</button>
+        <button type="submit">new Seal</button>
       </form>
       <div v-if="error" class="error-message">
         {{ error }}
@@ -85,7 +85,7 @@
   </script>
   
   <style scoped>
-  .add-seal-view {
+  .new-seal-view {
     max-width: 600px;
     margin: 0 auto;
     padding: 20px;

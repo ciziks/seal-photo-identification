@@ -1,7 +1,7 @@
 <template>
-  <div class="add-sighting-view">
+  <div class="new-sighting-view">
     <loading-screen :isLoading="isLoading" />
-    <h1>Add Sighting</h1>
+    <h1>New Sighting</h1>
     <div v-if="!showCroppedImages">
       <form @submit.prevent="prepareCroppedImagesStep">
         <div>
@@ -388,20 +388,20 @@ export default {
 </script>
 
 <style scoped>
-.add-sighting-view form {
+.new-sighting-view form {
   margin-bottom: 20px;
 }
 
-.add-sighting-view .drop-area {
+.new-sighting-view .drop-area {
   cursor: pointer;
 }
 
-.add-sighting-view ul {
+.new-sighting-view ul {
   list-style-type: none;
   padding: 0;
 }
 
-.add-sighting-view li {
+.new-sighting-view li {
   margin: 5px 0;
 }
 

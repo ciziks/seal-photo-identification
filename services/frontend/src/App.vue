@@ -5,14 +5,17 @@
       <router-link to="/">
         <img src="@/assets/images/logo_64x64.jpeg" alt="Logo" class="logo"/>
       </router-link>
-      <router-link to="/add-seal" class="btn btn-primary">Add Seal</router-link>
-      <router-link to="/delete-seal" class="btn btn-primary">Delete Seal</router-link>
-      <router-link to="/find-seal" class="btn btn-primary">Find Seal</router-link>
+      <router-link to="/new-sighting" class="btn btn-primary">New Sighting</router-link>
+      <router-link to="/find-sighting" class="btn btn-primary">Find sighting</router-link>
+      <router-link to="/new-seal" class="btn btn-primary">New Seal</router-link>
       <router-link to="/list-seals" class="btn btn-primary">List seals</router-link>
-      <router-link to="/add-sighting" class="btn btn-primary">Add Sighting</router-link>
-      <router-link to="/delete-sighting" class="btn btn-primary">Delete Sighting</router-link>
-      <router-link to="/list-sighting" class="btn btn-primary">List sighting</router-link>
+      <router-link to="/find-seal" class="btn btn-primary">Find Seal</router-link>
       <router-link to="/export" class="btn btn-primary">Export Database</router-link>
+
+      <router-link to="/delete-seal" class="btn btn-primary">Delete Seal</router-link>
+      <router-link to="/delete-sighting" class="btn btn-primary">Delete Sighting</router-link>
+      
+      
       <router-link to="/user-guide" class="btn btn-primary user-guide">User Guide</router-link> 
     </div>
     <div class="content">

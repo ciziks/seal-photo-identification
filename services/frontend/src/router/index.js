@@ -1,11 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import ListSealsView from '../views/ListSealsView';
-import AddSealView from '../views/AddSealView.vue';
+import NewSealView from '../views/NewSealView.vue';
 import DeleteSealView from '../views/DeleteSealView.vue';
-import AddSightingView from '../views/AddSightingView.vue';
+import NewSightingView from '../views/NewSightingView.vue';
 import DeleteSightingView from '../views/DeleteSightingView.vue';
-import ListSightingView from '../views/ListSightingView.vue';
+import FindSightingView from '../views/FindSightingView.vue';
 import SealDetailsView from '../views/SealDetailsView.vue';
 import FindSealView from '../views/FindSealView.vue';
 import UserGuideView from '../views/UserGuideView.vue';
@@ -18,22 +18,14 @@ const routes = [
     component: HomeView
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  },
-  {
     path: '/list-seals',
     name: 'list-seals',
     component: ListSealsView
   },
   {
-    path: '/add-seal',
-    name: 'add-seal',
-    component: AddSealView
+    path: '/new-seal',
+    name: 'new-seal',
+    component: NewSealView
   },
   {
     path: '/delete-seal',
@@ -41,9 +33,9 @@ const routes = [
     component: DeleteSealView
   },
   {
-    path: '/add-sighting',
-    name: 'add-sighting',
-    component: AddSightingView
+    path: '/new-sighting',
+    name: 'new-sighting',
+    component: NewSightingView
   },
   {
     path: '/delete-sighting',
@@ -51,9 +43,9 @@ const routes = [
     component: DeleteSightingView
   },
   {
-    path: '/list-sighting',
-    name: 'list-sighting',
-    component: ListSightingView
+    path: '/find-sighting',
+    name: 'find-sighting',
+    component: FindSightingView
   },
   {
     path: '/seal/:sealId',

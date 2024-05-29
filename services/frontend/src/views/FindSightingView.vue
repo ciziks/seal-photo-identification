@@ -1,6 +1,6 @@
 <template>
-  <div class="list-sighting-view">
-    <h1>List Sighting</h1>
+  <div class="find-sighting-view">
+    <h1>Find Sighting</h1>
     <div class="input-container">
       <form @submit.prevent="fetchSighting">
         <div>
@@ -15,7 +15,7 @@
             <option value="centre">Centre</option>
           </select>
         </div>
-        <button type="submit">Get Sighting</button>
+        <button type="submit">Find Sighting</button>
       </form>
     </div>
     <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
@@ -144,7 +144,7 @@ export default {
 </script>
 
 <style>
-.list-sighting-view {
+.find-sighting-view {
   display: flex;
   flex-direction: column;
   align-items: center;
