@@ -14,7 +14,7 @@ Welcome to **Sealcentre Photo-Identification**! The current project aims to crea
 
 ## How to Run
 
-With Docker Desktop running, the first step is to download WildBook's Image. The WBIA software is built and deployed as a Docker image wildme/wbia. After git cloning this repository, execute the follow command on the main directory to build the application container:
+With Docker Desktop running, the first step is to download WildBook's Image. The WBIA software is built and deployed as a Docker image wildme/wbia. After git cloning this repository, insert your existing WildBook Database in the root directory. Then, execute the follow command on the main directory to build the application container:
 ```
 docker-compose up -d --build
 ```
