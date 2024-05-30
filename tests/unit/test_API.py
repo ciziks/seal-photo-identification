@@ -1,5 +1,5 @@
 import requests_mock
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import patch, mock_open
 from services.backend.src.wildbook import Wildbook
 import pytest
 

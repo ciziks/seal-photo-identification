@@ -1,0 +1,7 @@
+[run]
+source = services/backend/src
+
+[report]
+omit =
+    tests/*
+    .venv/*

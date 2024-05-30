@@ -1,0 +1,6 @@
+projectKey=seal-photo-identification
+serverUrl=http://localhost:9000
+serverVersion=10.5.1.90531
+dashboardUrl=http://localhost:9000/dashboard?id=seal-photo-identification
+ceTaskId=027a810d-c78d-468e-a266-276a6a02010b
+ceTaskUrl=http://localhost:9000/api/ce/task?id=027a810d-c78d-468e-a266-276a6a02010b
