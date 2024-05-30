@@ -2,9 +2,7 @@
 
 ## Overview
 
-Welcome to **Sealcentre Photo-Identification**! The current project aims to create an application that performs photo-comparison and matching of seals for the researchs in the [Sealcentre Pieterburen](https://www.visitgroningen.nl/en/things-to-do/groningen-for-kids/sealcentre-pieterburen). For that, we are using WildBook AI, Docker, Python and PostgreSQL.
-
-Currently, the repository contains the Minimum Viable Product (MVP) for our project. This README will guide you through the setup process and provide an overview of the project structure and functionality.
+Welcome to **Sealcentre Photo-Identification**! The current project aims to create an application that performs photo-comparison and matching of seals for the researchs in the [Sealcentre Pieterburen](https://www.visitgroningen.nl/en/things-to-do/groningen-for-kids/sealcentre-pieterburen). For that, we are using WildBook AI, Docker, Python and SQLite. This README will guide you through the setup process and provide an overview of the project structure and functionality.
 
 ## Requirements
 
@@ -20,3 +18,8 @@ With Docker Desktop running, the first step is to download WildBook's Image. The
 ```
 docker-compose up -d --build
 ```
+
+After docker installs the images and prepares the containers, the container's tab should look like this:
+![Docker Containers](DockerContainers.png)
+
+Ready! You can start using the web app in ```localhost:8080```.
