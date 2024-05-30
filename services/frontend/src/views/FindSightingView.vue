@@ -1,69 +1,47 @@
 <template>
   <div class="find-sighting-view">
-    <div class="split-container">
-      <div class="left-container">
-        <h2>Find Sighting</h2>
-        <div class="input-container">
-          <form @submit.prevent="fetchSighting">
-            <div>
-              <label for="date">Date:</label>
-              <input type="date" v-model="sightingDate" id="date" required />
-            </div>
-            <div>
-              <label for="location">Location:</label>
-              <select v-model="sightingLocation" id="location" required>
-                <option value="" disabled>Select Location</option>
-                <option value="field">Field</option>
-                <option value="centre">Centre</option>
-              </select>
-            </div>
-            <button type="submit">Find Sighting</button>
-          </form>
-        </div>
-        <p v-if="fetchErrorMessage" class="error-message">{{ fetchErrorMessage }}</p>
-        <div v-if="sighting">
-          <h2>Sighting Information</h2>
-          <p>Date: {{ sighting.Date }}</p>
-          <p>Location: {{ sighting.Location }}</p>
-          <div v-for="(encounter, index) in uniqueEncounters" :key="index" class="seal">
-            <div class="seal-header">
-              <h2 @click="goToSealDetails(encounter.SealID)" class="seal-name">{{ encounter.SealID }}</h2>
-              <button v-if="getEncounterImages(index).length > 3" @click="nextImages(index)" class="next-button">
-                <img src="@/assets/images/right_arrow.png" />
-              </button>
-            </div>
-            <div class="seal-images">
-              <img
-                v-for="(image, imgIndex) in getCurrentImages(index)"
-                :key="imgIndex"
-                :src="image"
-                :alt="`Image of ${encounter.SealID}`"
-                @click="openModal(image)"
-              />
-            </div>
+    <div v-if="!sighting">
+      <h2>Find Sighting</h2>
+      <div class="input-container">
+        <form @submit.prevent="fetchSighting">
+          <div>
+            <label for="date">Date:</label>
+            <input type="date" v-model="sightingDate" id="date" required />
           </div>
-        </div>
+          <div>
+            <label for="location">Location:</label>
+            <select v-model="sightingLocation" id="location" required>
+              <option value="" disabled>Select Location</option>
+              <option value="field">Field</option>
+              <option value="centre">Centre</option>
+            </select>
+          </div>
+          <button type="submit">Find Sighting</button>
+        </form>
       </div>
-      <div class="right-container">
-        <h2>Delete Sighting</h2>
-        <div class="delete-container">
-          <form @submit.prevent="openDeleteModal">
-            <div>
-              <label for="delete-date">Date:</label>
-              <input type="date" v-model="deleteDate" id="delete-date" required />
-            </div>
-            <div>
-              <label for="delete-location">Location:</label>
-              <select v-model="deleteLocation" id="delete-location" required>
-                <option value="" disabled>Select Location</option>
-                <option value="field">Field</option>
-                <option value="centre">Centre</option>
-              </select>
-            </div>
-            <button type="submit">Delete</button>
-          </form>
-          <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
-          <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
+      <p v-if="fetchErrorMessage" class="error-message">{{ fetchErrorMessage }}</p>
+    </div>
+
+    <div v-if="sighting">
+      <h2>Sighting Information</h2>
+      <p>Date: {{ sighting.Date }}</p>
+      <p>Location: {{ sighting.Location }}</p>
+      <button class="delete-button" @click="openDeleteModal">Delete Sighting</button>
+      <div v-for="(encounter, index) in uniqueEncounters" :key="index" class="seal">
+        <div class="seal-header">
+          <h2 @click="goToSealDetails(encounter.SealID)" class="seal-name">{{ encounter.SealID }}</h2>
+          <button v-if="getEncounterImages(index).length > 3" @click="nextImages(index)" class="next-button">
+            <img src="@/assets/images/right_arrow.png" />
+          </button>
+        </div>
+        <div class="seal-images">
+          <img
+            v-for="(image, imgIndex) in getCurrentImages(index)"
+            :key="imgIndex"
+            :src="image"
+            :alt="`Image of ${encounter.SealID}`"
+            @click="openModal(image)"
+          />
         </div>
       </div>
     </div>
@@ -105,11 +83,10 @@ export default {
       uniqueEncounters: [],
       showModal: false,
       currentImage: null,
-      deleteDate: '',
-      deleteLocation: '',
       showDeleteModal: false,
       errorMessage: '',
-      successMessage: ''
+      successMessage: '',
+      formattedDate: '', // Store formatted date for delete
     };
   },
   setup() {
@@ -121,10 +98,10 @@ export default {
     async fetchSighting() {
       try {
         this.setLoading(true);
-        const formattedDate = this.sightingDate.split('-').reverse().join('-'); // Convert date to dd-mm-yyyy format
+        this.formattedDate = this.sightingDate.split('-').reverse().join('-'); // Convert date to dd-mm-yyyy format
         const response = await axios.get('http://localhost:5001/sightings/search/', {
           params: {
-            date: formattedDate,
+            date: this.formattedDate,
             location: this.sightingLocation,
           },
         });
@@ -191,15 +168,13 @@ export default {
       try {
         this.errorMessage = null;
         this.successMessage = false;
-
-        // Format the date to dd-mm-yyyy
-        const formattedDate = this.deleteDate.split('-').reverse().join('-');
         
-        await axios.delete(`http://localhost:5001/sightings/${this.deleteLocation}/${formattedDate}`);
+        await axios.delete(`http://localhost:5001/sightings/${this.sightingLocation}/${this.formattedDate}`);
         
         this.successMessage = 'Sighting deleted successfully!';
-        this.deleteDate = '';
-        this.deleteLocation = '';
+        this.sightingDate = '';
+        this.sightingLocation = '';
+        this.sighting = null;
         this.closeDeleteModal();
       } catch (error) {
         if (error.response && error.response.status === 404) {
@@ -221,16 +196,6 @@ export default {
   width: 100%;
   padding: 20px;
   box-sizing: border-box; /* Ensure padding is included in element's total width and height */
-}
-
-.split-container {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-}
-
-.left-container, .right-container {
-  width: 48%;
 }
 
 h1 {
@@ -266,6 +231,14 @@ button {
 
 button:hover {
   background-color: #0056b3;
+}
+
+.delete-button {
+  background-color: #dc3545;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
 }
 
 .error-message {
