@@ -1,6 +1,6 @@
 import requests_mock
 from unittest.mock import MagicMock, patch, mock_open
-from services.backend.src.wrappers.Wildbook import Wildbook
+from services.backend.src.wildbook import Wildbook
 import pytest
 
 API_URL = "http://wildbook:5000/api"
@@ -8,8 +8,8 @@ API_URL = "http://wildbook:5000/api"
 # Mock the requests module
 @pytest.fixture
 def mock_requests(monkeypatch):
-    with requests_mock.Mocker() as m:
-        yield m
+    with requests_mock.Mocker() as mock_get:
+        yield mock_get
 
 def test_is_running(mock_requests):
     wildbook = Wildbook()
@@ -38,7 +38,7 @@ def test_remove_image(mock_requests):
     mock_requests.delete(f"{API_URL}/image/json/", json={"status": {"success": True}})
 
     # Test the method
-    assert wildbook.remove_image(["image_uuid"]) is None
+    assert wildbook.remove_image(["image_uuid"]) is True
 
 def test_list_images_id(mock_requests):
     wildbook = Wildbook()
@@ -54,9 +54,9 @@ def test_get_images_uuids(mock_requests):
     wildbook = Wildbook()
 
     # Mock the endpoint response
-    mock_requests.get(f"{API_URL}/image/uuid/", json={"status": {"success": True}, "response": ["uuid1", "uuid2"]})
+    mock_requests.get(f"{API_URL}/image/uuid/", json={"status": {"success": True}, "response": [{"__UUID__": "uuid1"}, {"__UUID__": "uuid2"}]})
 
-    image_ids = ["id1", "id2"]
+    image_ids = ["1", "2"]
     # Test the method
     image_uuids = wildbook.get_images_uuids(image_ids)
     assert image_uuids == ["uuid1", "uuid2"]
@@ -101,11 +101,15 @@ def test_list_annotation_from_names(mock_requests):
     annotations = wildbook.list_annotation_from_names(["name1", "name2"])
     assert annotations == [1, 2]
 
-def test_list_annotations_id(mock_requests):
+def mock_get_annotation_id(self, uuid_list):
+    return ["annot" + uuid[-1] for uuid in uuid_list]
+
+def test_list_annotations_id(mock_requests, monkeypatch):
     wildbook = Wildbook()
+    monkeypatch.setattr(wildbook, 'get_annotation_id', mock_get_annotation_id.__get__(wildbook))
 
     # Mock the endpoint response
-    mock_requests.get(f"{API_URL}/annot/json/", json={"status": {"success": True}, "response": ["annot1", "annot2"]})
+    mock_requests.get(f"{API_URL}/annot/json/", json={"status": {"success": True}, "response": [{"__UUID__": "uuid1"}, {"__UUID__": "uuid2"}]})
 
     # Test the method
     annotations = wildbook.list_annotations_id()
@@ -149,7 +153,7 @@ def test_rename_annotations(mock_requests):
     mock_requests.put(f"{API_URL}/annot/name/", json={"status": {"success": True}})
 
     # Test the method
-    assert wildbook.rename_annotations("annot_uuid", "new_name") is None
+    assert wildbook.rename_annotations("annot_uuid", "new_name") is True
 
 def test_remove_annotation(mock_requests):
     wildbook = Wildbook()
@@ -158,7 +162,7 @@ def test_remove_annotation(mock_requests):
     mock_requests.delete(f"{API_URL}/image/json/", json={"status": {"success": True}})
 
     # Test the method
-    assert wildbook.remove_annotation(["annot_uuid"]) is None
+    assert wildbook.remove_annotation(["annot_uuid"]) is True
 
 def test_seal_matching(mock_requests):
     wildbook = Wildbook()
