@@ -80,7 +80,7 @@
               :src="result.image"
               :alt="'Detected Image ' + index"
               class="detected-image"
-              @click="openModal(result.image)"
+              @click="openModal(result.image, croppedImages[currentCroppedImageIndex][currentSubImageIndex])"
             />
             <button @click="createEncounter(result.id)">Select</button>
           </div>
@@ -147,7 +147,14 @@
     <div v-if="showModal" class="modal">
       <div class="modal-content">
         <span class="close-button" @click="closeModal">&times;</span>
-        <img :src="currentImage" alt="Seal Image" class="modal-image" />
+        <div class="modal-images">
+          <div class="modal-image-container">
+            <img :src="currentImage.left" alt="Initial Cropped Image" class="modal-image" />
+          </div>
+          <div class="modal-image-container">
+            <img :src="currentImage.right" alt="Detected Image" class="modal-image" />
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -289,7 +296,7 @@ export default {
         const response = await fetch(croppedImageUrl);
         const blob = await response.blob();
         const formData = new FormData();
-        formData.append('image', blob, 'cropped_image.png');
+        formData.append('images', blob, 'cropped_image.png');
         
         const detectResponse = await axios.post('http://localhost:5001/detect', formData, {
           headers: {
@@ -298,11 +305,11 @@ export default {
         });
 
         const scores = detectResponse.data;
-        this.currentWildbookId = scores.wildbook_id; // Store the wildbook_id
-        this.detectionResults = Object.keys(scores).slice(1).map(key => ({
+        this.currentWildbookId = Object.keys(scores)[0]; // Store the first wildbook_id
+        this.detectionResults = Object.entries(scores[this.currentWildbookId]).map(([key, value]) => ({
           id: key,
-          score: scores[key].score,
-          image: scores[key].image,
+          score: value.score,
+          image: value.image,
         }));
 
         console.log('Detection results:', this.detectionResults);
@@ -368,8 +375,11 @@ export default {
         this.newSealError = error.response?.data?.detail || error.message;
       }
     },
-    openModal(image) {
-      this.currentImage = image;
+    openModal(detectedImage, croppedImage) {
+      this.currentImage = {
+        left: croppedImage,
+        right: detectedImage,
+      };
       this.showModal = true;
     },
     closeModal() {
@@ -495,18 +505,29 @@ export default {
   text-align: center;
 }
 
-.close-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 2em;
-  cursor: pointer;
+.modal-images {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-image-container {
+  flex: 1;
+  margin: 0 10px;
 }
 
 .modal-image {
   max-width: 100%;
   max-height: 80vh;
   object-fit: contain;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 2em;
+  cursor: pointer;
 }
 
 form {
