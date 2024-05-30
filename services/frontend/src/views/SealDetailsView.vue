@@ -10,8 +10,8 @@
       <p>Description: <span v-if="seal.description" class="data">{{ seal.description }}</span><span v-else class="no-data"><em>no data</em></span></p>
       <p>Pregnant: <span v-if="seal.isPregnant" class="data">{{ seal.isPregnant }}</span><span v-else class="no-data"><em>no data</em></span></p>
       <div class="seal-images-grid">
-        <div v-for="(image, index) in seal.images" :key="index" class="image-container" @click="openModal(image)">
-          <img :src="image" alt="Seal Image" />
+        <div v-for="(encounter, index) in seal.encounters" :key="index" class="image-container" @click="openModal(encounter.image, encounter.Date)">
+          <img :src="encounter.image" alt="Seal Image" />
         </div>
       </div>
     </div>
@@ -21,7 +21,12 @@
     <div v-if="showModal" class="modal">
       <div class="modal-content">
         <span class="close-button" @click="closeModal">&times;</span>
-        <img :src="currentImage" alt="Seal Image" class="modal-image" />
+        <div class="modal-content-flex">
+          <img :src="currentImage" alt="Seal Image" class="modal-image" />
+          <div class="modal-info">
+            <p>Date: {{ currentImageDate }}</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -86,6 +91,7 @@ export default {
       errorMessage: '',
       showModal: false,
       currentImage: null,
+      currentImageDate: null,
       showEditModal: false,
       showDeleteModal: false,
       editSeal: {
@@ -116,13 +122,15 @@ export default {
         this.errorMessage = 'Seal not found';
       }
     },
-    openModal(image) {
+    openModal(image, date) {
       this.currentImage = image;
+      this.currentImageDate = date;
       this.showModal = true;
     },
     closeModal() {
       this.showModal = false;
       this.currentImage = null;
+      this.currentImageDate = null;
     },
     openEditModal() {
       this.showEditModal = true;
@@ -149,7 +157,7 @@ export default {
     async deleteSeal() {
       try {
         await axios.delete(`http://localhost:5001/seals/${this.sealId}`);
-        alert('Seal deleted succesfully!')
+        alert('Seal deleted successfully!');
         location.reload(); // Reload the page
       } catch (error) {
         this.errorMessage = 'Failed to delete seal';
@@ -242,6 +250,17 @@ h1 {
   max-width: 80%;
   max-height: 80%;
   text-align: center;
+}
+
+.modal-content-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-info {
+  margin-left: 20px;
+  color: #333;
 }
 
 .close-button {
