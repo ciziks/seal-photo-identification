@@ -5,7 +5,7 @@
       <div class="seal-header">
         <h2 @click="goToSealDetails(name)" class="seal-name">{{ name }}</h2>
         <button v-if="images.length > 3" @click="nextImages(name)" class="next-button">
-          <img src="@/assets/images/right_arrow.png" />
+          <img src="@/assets/images/right_arrow.png" alt="Next images arrow"/>
         </button>
       </div>
       <div class="seal-images">
@@ -13,7 +13,7 @@
           v-for="(image, index) in getCurrentImages(name)"
           :key="index"
           :src="image"
-          alt="Seal"
+          :alt="`Seal ${name}`"
           @click="openModal(image)"
         />
       </div>
@@ -28,7 +28,7 @@
     <div v-if="showModal" class="modal">
       <div class="modal-content">
         <span class="close-button" @click="closeModal">&times;</span>
-        <img :src="currentImage" alt="Seal Image" class="modal-image" />
+        <img :src="currentImage" :alt="`Seal ${currentImage}`" class="modal-image" />
       </div>
     </div>
   </div>

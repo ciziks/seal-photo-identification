@@ -39,7 +39,7 @@
         <vue-cropper
           ref="cropper"
           :src="currentImageSrc"
-          alt="Source Image"
+          alt="Seal to be cropped"
           :view-mode="1"
           :guides="true"
           :aspect-ratio="NaN"
@@ -56,7 +56,7 @@
           <h3>Images from file {{ index + 1 }}</h3>
           <div class="cropped-images-container">
             <div v-for="(image, imgIndex) in imageGroup" :key="imgIndex" class="preview">
-              <img :src="image" :alt="'Cropped Image ' + imgIndex" />
+              <img :src="image" :alt="'Cropped Seal ' + imgIndex" />
             </div>
           </div>
         </div>
@@ -66,7 +66,7 @@
     <div v-else class="cropped-images-step">
       <h2>Process Cropped Images</h2>
       <div v-if="croppedImages[currentCroppedImageIndex]">
-        <img class="cropped-image" :src="croppedImages[currentCroppedImageIndex][currentSubImageIndex]" alt="Cropped Image" />
+        <img class="cropped-image" :src="croppedImages[currentCroppedImageIndex][currentSubImageIndex]" :alt="'Cropped Seal ' + currentSubImageIndex" />
         <div class="buttons">
           <button @click="detectImage">Detect</button>
           <button v-if="!isLastImage" @click="skipImage">Skip</button>
@@ -78,7 +78,7 @@
             <p>Score: {{ result.score }}</p>
             <img
               :src="result.image"
-              :alt="'Detected Image ' + index"
+              :alt="'Detected Seal ' + index"
               class="detected-image"
               @click="openModal(result.image, croppedImages[currentCroppedImageIndex][currentSubImageIndex])"
             />
@@ -149,10 +149,10 @@
         <span class="close-button" @click="closeModal">&times;</span>
         <div class="modal-images">
           <div class="modal-image-container">
-            <img :src="currentImage.left" alt="Initial Cropped Image" class="modal-image" />
+            <img :src="currentImage.left" :alt="'Initial Cropped Seal ' + currentImage.left" class="modal-image" />
           </div>
           <div class="modal-image-container">
-            <img :src="currentImage.right" alt="Detected Image" class="modal-image" />
+            <img :src="currentImage.right" :alt="'Detected Seal ' + currentImage.right" class="modal-image" />
           </div>
         </div>
       </div>

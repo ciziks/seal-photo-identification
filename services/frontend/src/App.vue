@@ -64,6 +64,7 @@ export default {
 .logo {
   margin-top: 10px;
   width: 64px; /* Adjust size as needed */
+  cursor: pointer; /* Optional: changes cursor on hover to indicate clickability */
 }
 .content {
   flex: 1;
@@ -74,9 +75,6 @@ export default {
 .btn {
   margin-top: 20px;
   width: 100%; /* Full-width button */
-}
-.logo {
-  cursor: pointer; /* Optional: changes cursor on hover to indicate clickability */
 }
 .user-guide {
   margin-top: auto; /* Pushes the User Guide link to the bottom of the sidebar */

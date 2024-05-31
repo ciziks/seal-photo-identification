@@ -11,7 +11,7 @@
       <p>Pregnant: <span v-if="seal.isPregnant" class="data">{{ seal.isPregnant }}</span><span v-else class="no-data"><em>no data</em></span></p>
       <div class="seal-images-grid">
         <div v-for="(encounter, index) in seal.encounters" :key="index" class="image-container" @click="openModal(encounter.image, encounter.Date)">
-          <img :src="encounter.image" alt="Seal Image" />
+          <img :src="encounter.image" alt="Seal Encounter" />
         </div>
       </div>
     </div>
@@ -22,7 +22,7 @@
       <div class="modal-content">
         <span class="close-button" @click="closeModal">&times;</span>
         <div class="modal-content-flex">
-          <img :src="currentImage" alt="Seal Image" class="modal-image" />
+          <img :src="currentImage" alt="Seal Encounter" class="modal-image" />
           <div class="modal-info">
             <p>Date: {{ currentImageDate }}</p>
           </div>

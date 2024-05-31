@@ -35,7 +35,7 @@ export default {
 
 <style scoped>
 .home-view {
-  font-family: 'Arial, sans-serif';
+  font-family: 'Arial', sans-serif; 
   text-align: center;
   background-image: url('@/assets/images/background.jpeg');
   background-size: cover;
@@ -58,7 +58,6 @@ header {
 header h1 {
   color: #fff;
 }
-
 
 .intro {
   background: rgba(0, 0, 0, 0.6);
