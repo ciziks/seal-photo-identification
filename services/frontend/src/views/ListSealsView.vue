@@ -5,7 +5,7 @@
       <div class="seal-header">
         <h2 @click="goToSealDetails(name)" class="seal-name">{{ name }}</h2>
         <button v-if="images.length > 3" @click="nextImages(name)" class="next-button">
-          <img src="@/assets/images/right_arrow.png" alt="Next images arrow"/>
+          <img src="@/assets/images/right_arrow.png" alt="Next Page"/>
         </button>
       </div>
       <div class="seal-images">

@@ -31,7 +31,7 @@
         <div class="seal-header">
           <h2 @click="goToSealDetails(encounter.SealID)" class="seal-name">{{ encounter.SealID }}</h2>
           <button v-if="getEncounterImages(index).length > 3" @click="nextImages(index)" class="next-button">
-            <img src="@/assets/images/right_arrow.png" alt="Next images arrow"/>
+            <img src="@/assets/images/right_arrow.png" alt="Next Page"/>
           </button>
         </div>
         <div class="seal-images">
