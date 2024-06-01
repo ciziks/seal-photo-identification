@@ -3,9 +3,9 @@ from typing import List, Optional, Tuple
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 from fastapi import Depends
-from src.models import Sighting
-from src.schemas import SightingCreate
-from src.database import get_db
+from services.backend.src.models import Sighting
+from services.backend.src.schemas import SightingCreate
+from services.backend.src.database import get_db
 
 
 class SightingDAO:

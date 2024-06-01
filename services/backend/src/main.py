@@ -3,15 +3,15 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError, DataError, DatabaseError
 from sqlalchemy.orm import Session
-from src.database import engine, Base, get_db
+from services.backend.src.database import engine, Base, get_db
 from .exceptions import (
     sqlalchemy_data_error_handler,
     sqlalchemy_database_error_handler,
     sqlalchemy_exception_handler,
     sqlalchemy_integrity_error_handler,
 )
-from .endpoints import seals, sightings, encounters, detection, export
-from .wildbook import Wildbook
+from services.backend.src.endpoints import seals, sightings, encounters, detection, export
+from services.backend.src.wildbook import Wildbook
 
 Base.metadata.create_all(bind=engine)
 
@@ -41,6 +41,21 @@ def root(wildbook: Wildbook = Depends(Wildbook), db: Session = Depends(get_db)):
         "wildbook": wildbook_running,
     }
 
+@app.get("/raise-sqlalchemy-error")
+def raise_sqlalchemy_error():
+    raise SQLAlchemyError("SQLAlchemy error")
+
+@app.get("/raise-integrity-error")
+def raise_integrity_error():
+    raise IntegrityError("Integrity error", None, None)
+
+@app.get("/raise-data-error")
+def raise_data_error():
+    raise DataError("Data error", None, None)
+
+@app.get("/raise-database-error")
+def raise_database_error():
+    raise DatabaseError("Database error", None, None)
 
 app.add_exception_handler(SQLAlchemyError, sqlalchemy_exception_handler)
 app.add_exception_handler(IntegrityError, sqlalchemy_integrity_error_handler)

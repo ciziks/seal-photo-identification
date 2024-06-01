@@ -3,11 +3,10 @@ import pandas as pd
 from fastapi import APIRouter, Depends
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from src.database import get_db
-from src.models import Sighting, Seal, Encounter
+from services.backend.src.database import get_db
+from services.backend.src.models import Sighting, Seal, Encounter
 
 router = APIRouter()
-
 
 @router.get("")
 def export_data(db: Session = Depends(get_db)):

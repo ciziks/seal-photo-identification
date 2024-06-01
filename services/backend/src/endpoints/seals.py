@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
-from src.wildbook import Wildbook
-from src.constants import SEAL_NOT_FOUND_MESSAGE, SEAL_ALREADY_EXISTS_MESSAGE
-from src.crud.seal import SealDAO
-from src.crud.sighting import SightingDAO
-from src.schemas import Seal, SealCreate
+from services.backend.src.wildbook import Wildbook
+from services.backend.src.constants import SEAL_NOT_FOUND_MESSAGE, SEAL_ALREADY_EXISTS_MESSAGE
+from services.backend.src.crud.seal import SealDAO
+from services.backend.src.crud.sighting import SightingDAO
+from services.backend.src.schemas import Seal, SealCreate
 
 router = APIRouter()
 

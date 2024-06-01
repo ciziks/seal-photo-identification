@@ -1,9 +1,9 @@
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
-from src.database import get_db
-from src.models import Encounter
-from src.schemas import EncounterCreate
+from services.backend.src.database import get_db
+from services.backend.src.models import Encounter
+from services.backend.src.schemas import EncounterCreate
 
 
 class EncounterDAO:
@@ -20,4 +20,4 @@ class EncounterDAO:
 
     # Method to get an Encounter from Database
     def get_encounter(self, encounter_id: int) -> Encounter:
-        return self.db.query(Encounter).filter(Encounter.id == encounter_id).first()
+        return self.db.query(Encounter).filter(Encounter.WildBookID == encounter_id).first()

@@ -1,5 +1,6 @@
-import requests_mock
-from unittest.mock import patch, mock_open
+import unittest
+import requests_mock, requests
+from unittest.mock import call, patch, mock_open
 from services.backend.src.wildbook import Wildbook
 import pytest
 
@@ -20,6 +21,16 @@ def test_is_running(mock_requests):
     # Test the method
     assert wildbook.is_running() is True
 
+def test_is_running_invalid_url(mock_requests):
+    wildbook = Wildbook(url="http://invalidurl")
+    mock_requests.get("http://invalidurl/api/test/helloworld/", exc=requests.exceptions.ConnectionError)
+    assert wildbook.is_running() is False
+
+def test_is_running_http_error(mock_requests):
+    wildbook = Wildbook()
+    mock_requests.get(f"{API_URL}/test/helloworld/", status_code=500)
+    assert wildbook.is_running() is False
+
 def test_upload_image(mock_requests):
     wildbook = Wildbook()
 
@@ -30,6 +41,46 @@ def test_upload_image(mock_requests):
     with patch("builtins.open", mock_open(read_data="file_content")):
         image_id = wildbook.upload_image("dummy_path")
         assert image_id == "image_id"
+
+def test_upload_image_invalid_path():
+    wildbook = Wildbook()
+    with pytest.raises(FileNotFoundError):
+        wildbook.upload_image("invalid_path")
+
+def test_get_annotation_name_key_error(mock_requests):
+    wildbook = Wildbook()
+    mock_requests.get(f"{API_URL}/annot/name/text/", json={"annotations": []})
+    with pytest.raises(KeyError):
+        wildbook.get_annotation_name("nonexistent_annotation")
+
+def test_list_images_id_empty_response(mock_requests):
+    wildbook = Wildbook()
+    mock_requests.get(f"{API_URL}/image/", json={})
+    assert wildbook.list_images_id() == None
+
+def test_upload_image_file_not_found():
+    wildbook = Wildbook()
+    with pytest.raises(FileNotFoundError):
+        wildbook.upload_image("nonexistent_file_path")
+
+def test_seal_matching_unexpected_response(mock_requests):
+    wildbook = Wildbook()
+    mock_requests.get(f"{API_URL}/query/chip/dict/simple", json={"unexpected_key": []})
+    with pytest.raises(KeyError):
+        wildbook.seal_matching(["annotation_id"], ["comparison_id"])
+
+def test_upload_image_failure_message(mock_requests):
+    wildbook = Wildbook()
+    
+    # Mock the endpoint response with a failure status
+    mock_requests.post(f"{API_URL}/upload/image/", json={"status": {"success": False, "message": "Failed to upload image"}})
+    
+    # Mock the open function to simulate reading a file
+    with patch("builtins.open", mock_open(read_data="file_content")):
+        result = wildbook.upload_image("dummy_path")
+        
+        # Test that the result is the failure message
+        assert result == "Failed to upload image"
 
 def test_remove_image(mock_requests):
     wildbook = Wildbook()
@@ -49,6 +100,68 @@ def test_list_images_id(mock_requests):
     # Test the method
     image_ids = wildbook.list_images_id()
     assert image_ids == ["id1", "id2"]
+
+def test_get_images_size_success(mock_requests):
+    wildbook = Wildbook()
+    
+    image_id_list = [1, 2, 3]
+    
+    # Mock the endpoint responses with success status and response data
+    mock_requests.get(f"{API_URL}/image/height/", json={"status": True, "response": [200, 300, 400]})
+    mock_requests.get(f"{API_URL}/image/width/", json={"status": True, "response": [100, 150, 200]})
+    
+    # Test the method
+    result = wildbook.get_images_size(image_id_list)
+    
+    # Assert that the result is a list of tuples with width and height
+    assert result == [(100, 200), (150, 300), (200, 400)]
+
+def test_get_images_size_failure_height(mock_requests):
+    wildbook = Wildbook()
+    
+    image_id_list = [1, 2, 3]
+    
+    # Mock the height endpoint response with a failure status
+    mock_requests.get(f"{API_URL}/image/height/", json={"status": False, "message": "Failed to get height"})
+    # Mock the width endpoint response with a success status
+    mock_requests.get(f"{API_URL}/image/width/", json={"status": True, "response": [100, 150, 200]})
+    
+    # Test the method
+    result = wildbook.get_images_size(image_id_list)
+    
+    # Assert that the result is an empty list when height status indicates failure
+    assert result == []
+
+def test_get_images_size_failure_width(mock_requests):
+    wildbook = Wildbook()
+    
+    image_id_list = [1, 2, 3]
+    
+    # Mock the height endpoint response with a success status
+    mock_requests.get(f"{API_URL}/image/height/", json={"status": True, "response": [200, 300, 400]})
+    # Mock the width endpoint response with a failure status
+    mock_requests.get(f"{API_URL}/image/width/", json={"status": False, "message": "Failed to get width"})
+    
+    # Test the method
+    result = wildbook.get_images_size(image_id_list)
+    
+    # Assert that the result is an empty list when width status indicates failure
+    assert result == []
+
+def test_get_images_size_failure_both(mock_requests):
+    wildbook = Wildbook()
+    
+    image_id_list = [1, 2, 3]
+    
+    # Mock both endpoint responses with a failure status
+    mock_requests.get(f"{API_URL}/image/height/", json={"status": False, "message": "Failed to get height"})
+    mock_requests.get(f"{API_URL}/image/width/", json={"status": False, "message": "Failed to get width"})
+    
+    # Test the method
+    result = wildbook.get_images_size(image_id_list)
+    
+    # Assert that the result is an empty list when both statuses indicate failure
+    assert result == []
 
 def test_get_images_uuids(mock_requests):
     wildbook = Wildbook()
@@ -163,6 +276,34 @@ def test_remove_annotation(mock_requests):
 
     # Test the method
     assert wildbook.remove_annotation(["annot_uuid"]) is True
+
+def test_mark_as_exemplar(mock_requests):
+    wildbook = Wildbook()
+    
+    annot_id_list = ["annot1", "annot2", "annot3"]
+    
+    # Mock the endpoint response with a success status
+    mock_requests.put(f"{API_URL}/annot/exemplar/", json={"status": {"success": True}})
+    
+    # Test the method
+    result = wildbook.mark_as_exemplar(annot_id_list)
+    
+    # Assert that the result is True when the status indicates success
+    assert result is True
+
+def test_mark_as_exemplar_failure(mock_requests):
+    wildbook = Wildbook()
+    
+    annot_id_list = ["annot1", "annot2", "annot3"]
+    
+    # Mock the endpoint response with a failure status
+    mock_requests.put(f"{API_URL}/annot/exemplar/", json={"status": {"success": False}})
+    
+    # Test the method
+    result = wildbook.mark_as_exemplar(annot_id_list)
+    
+    # Assert that the result is False when the status indicates failure
+    assert result is False
 
 def test_seal_matching(mock_requests):
     wildbook = Wildbook()

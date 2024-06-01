@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from typing import List
 import os
-from src.wildbook import Wildbook
-from src import constants
+from services.backend.src.wildbook import Wildbook
+from services.backend.src import constants
 
 router = APIRouter()
 

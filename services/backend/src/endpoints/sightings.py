@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
-from src import constants
-from src.wildbook import Wildbook
-from src.crud.sighting import SightingDAO
-from src.schemas import Sighting, SightingCreate
+from services.backend.src import constants
+from services.backend.src.wildbook import Wildbook
+from services.backend.src.crud.sighting import SightingDAO
+from services.backend.src.schemas import Sighting, SightingCreate
 
 router = APIRouter()
 

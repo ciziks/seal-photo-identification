@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
-from src import constants
-from src.crud.encounter import EncounterDAO
-from src.crud.sighting import SightingDAO
-from src.crud.seal import SealDAO
-from src.schemas import EncounterSchema, EncounterCreate
+from services.backend.src import constants
+from services.backend.src.crud.encounter import EncounterDAO
+from services.backend.src.crud.sighting import SightingDAO
+from services.backend.src.crud.seal import SealDAO
+from services.backend.src.schemas import EncounterSchema, EncounterCreate
 
 router = APIRouter()
 
