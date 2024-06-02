@@ -1,9 +1,9 @@
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
-from services.backend.src.database import get_db
-from services.backend.src.models import Encounter
-from services.backend.src.schemas import EncounterCreate
+from ..database import get_db
+from ..models import Encounter
+from ..schemas import EncounterCreate
 
 
 class EncounterDAO:

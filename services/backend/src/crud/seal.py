@@ -1,9 +1,9 @@
 from typing import List, Tuple
 from sqlalchemy.orm import Session, joinedload
 from fastapi import Depends
-from services.backend.src.models import Seal
-from services.backend.src.schemas import SealCreate
-from services.backend.src.database import get_db
+from ..models import Seal
+from ..schemas import SealCreate
+from ..database import get_db
 
 
 class SealDAO:

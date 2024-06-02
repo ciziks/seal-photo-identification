@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from typing import List
 import os
-from services.backend.src.wildbook import Wildbook
-from services.backend.src import constants
+
+from ..constants import NO_IMAGE_MESSAGE
+from ..wildbook import Wildbook
 
 router = APIRouter()
 
@@ -17,7 +18,7 @@ async def seal_matching(
     names_list = wildbook.list_annotation_from_names(all_names_id)
 
     if not images or len(images) == 0:
-        raise HTTPException(status_code=400, detail=constants.NO_IMAGE_MESSAGE)
+        raise HTTPException(status_code=400, detail=NO_IMAGE_MESSAGE)
 
     # Save the image temporarily
     image_id_list = []

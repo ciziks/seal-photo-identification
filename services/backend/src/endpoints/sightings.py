@@ -1,10 +1,11 @@
 from datetime import datetime
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
-from services.backend.src import constants
-from services.backend.src.wildbook import Wildbook
-from services.backend.src.crud.sighting import SightingDAO
-from services.backend.src.schemas import Sighting, SightingCreate
+
+from ..constants import INVALID_DATE_MESSAGE, SIGHTING_NOT_FOUND_MESSAGE
+from ..wildbook import Wildbook
+from ..crud.sighting import SightingDAO
+from ..schemas import Sighting, SightingCreate
 
 router = APIRouter()
 
@@ -36,7 +37,7 @@ def read_sighting(
 
     if not db_sighting:
         raise HTTPException(
-            status_code=404, detail=constants.SIGHTING_NOT_FOUND_MESSAGE
+            status_code=404, detail=SIGHTING_NOT_FOUND_MESSAGE
         )
 
     sighting_images = []
@@ -94,7 +95,7 @@ def update_sighting(
 
     if db_sighting is None:
         raise HTTPException(
-            status_code=404, detail=constants.SIGHTING_NOT_FOUND_MESSAGE
+            status_code=404, detail=SIGHTING_NOT_FOUND_MESSAGE
         )
 
     return crud_sighting.update_sighting(db_sighting=db_sighting, sighting=sighting)
@@ -107,7 +108,7 @@ def delete_sighting(sighting_id: int, crud_sighting: SightingDAO = Depends()):
 
     if db_sighting is None:
         raise HTTPException(
-            status_code=404, detail=constants.SIGHTING_NOT_FOUND_MESSAGE
+            status_code=404, detail=SIGHTING_NOT_FOUND_MESSAGE
         )
 
     return crud_sighting.delete_sighting(db_sighting=db_sighting)
@@ -121,13 +122,13 @@ def delete_sighting_by_date_location(
     try:
         parsed_date = datetime.strptime(date, "%d-%m-%Y")
     except ValueError:
-        raise HTTPException(status_code=400, detail=constants.INVALID_DATE_MESSAGE)
+        raise HTTPException(status_code=400, detail=INVALID_DATE_MESSAGE)
 
     db_sighting = crud_sighting.find_sighting(parsed_date, location)
 
     if not db_sighting:
         raise HTTPException(
-            status_code=404, detail=constants.SIGHTING_NOT_FOUND_MESSAGE
+            status_code=404, detail=SIGHTING_NOT_FOUND_MESSAGE
         )
 
     return crud_sighting.delete_sighting(db_sighting[0])
@@ -147,7 +148,7 @@ def search_sightings(
         except ValueError:
             raise HTTPException(
                 status_code=400,
-                detail=constants.INVALID_DATE_MESSAGE,
+                detail=INVALID_DATE_MESSAGE,
             )
     else:
         parsed_date = None
@@ -155,7 +156,7 @@ def search_sightings(
     sightings = crud_sighting.find_sighting(parsed_date, location)
     if not sightings:
         raise HTTPException(
-            status_code=404, detail=constants.SIGHTING_NOT_FOUND_MESSAGE
+            status_code=404, detail=SIGHTING_NOT_FOUND_MESSAGE
         )
 
     sightings_data = []

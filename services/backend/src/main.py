@@ -3,15 +3,15 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError, DataError, DatabaseError
 from sqlalchemy.orm import Session
-from services.backend.src.database import engine, Base, get_db
+from .database import engine, Base, get_db
 from .exceptions import (
     sqlalchemy_data_error_handler,
     sqlalchemy_database_error_handler,
     sqlalchemy_exception_handler,
     sqlalchemy_integrity_error_handler,
 )
-from services.backend.src.endpoints import seals, sightings, encounters, detection, export
-from services.backend.src.wildbook import Wildbook
+from .endpoints import seals, sightings, encounters, detection, export
+from .wildbook import Wildbook
 
 Base.metadata.create_all(bind=engine)
 

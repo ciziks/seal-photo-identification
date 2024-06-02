@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
-from services.backend.src import constants
-from services.backend.src.crud.encounter import EncounterDAO
-from services.backend.src.crud.sighting import SightingDAO
-from services.backend.src.crud.seal import SealDAO
-from services.backend.src.schemas import EncounterSchema, EncounterCreate
+
+from ..constants import SEAL_NOT_FOUND_MESSAGE, SIGHTING_NOT_FOUND_MESSAGE
+from ..crud.encounter import EncounterDAO
+from ..crud.sighting import SightingDAO
+from ..crud.seal import SealDAO
+from ..schemas import EncounterSchema, EncounterCreate
 
 router = APIRouter()
 
@@ -21,11 +22,11 @@ def create_encounter(
 
     if not existing_sighting:
         raise HTTPException(
-            status_code=404, detail=constants.SIGHTING_NOT_FOUND_MESSAGE
+            status_code=404, detail=SIGHTING_NOT_FOUND_MESSAGE
         )
 
     existing_seal = crud_seal.get_seal(seal_id=encounter.SealID)
     if not existing_seal:
-        raise HTTPException(status_code=404, detail=constants.SEAL_NOT_FOUND_MESSAGE)
+        raise HTTPException(status_code=404, detail=SEAL_NOT_FOUND_MESSAGE)
 
     return crud_encounter.create_encounter(encounter)

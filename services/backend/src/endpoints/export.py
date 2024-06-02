@@ -3,8 +3,8 @@ import pandas as pd
 from fastapi import APIRouter, Depends
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from services.backend.src.database import get_db
-from services.backend.src.models import Sighting, Seal, Encounter
+from ..database import get_db
+from ..models import Sighting, Seal, Encounter
 
 router = APIRouter()
 
