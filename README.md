@@ -7,7 +7,6 @@ Welcome to **Sealcentre Photo-Identification**! The current project aims to crea
 ## Requirements
 
 - Python (version 3.9)
-- Flask (version 3.0)
 - [Poetry](https://python-poetry.org/)
 - [Docker](https://www.docker.com/)
 - [WildBook AI](https://github.com/WildMeOrg/wildbook-ia)
