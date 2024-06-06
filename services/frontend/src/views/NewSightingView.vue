@@ -363,7 +363,7 @@ export default {
         this.newSealError = null;
         this.newSealSuccess = false;
 
-        const response = await axios.post('http://localhost:5001/seal', this.newSeal);
+        const response = await axios.post('http://localhost:5001/seals', this.newSeal);
         console.log('New seal added:', response.data);
 
         const newSealId = response.data.ID;
